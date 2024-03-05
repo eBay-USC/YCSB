@@ -1,0 +1,32 @@
+normal
+start running at 2024.02.21.09:18:44
+amd64
+/lib/linux/amd64/libfdb_c.so
+amd64
+/lib/linux/amd64/libfdb_java.so
+Open normal subspace
+Finish running at 2024.02.21.09:18:59
+[OVERALL], RunTime(ms), 14666
+[OVERALL], Throughput(ops/sec), 68.18491749624982
+[TOTAL_GCS_PS_Scavenge], Count, 0
+[TOTAL_GC_TIME_PS_Scavenge], Time(ms), 0
+[TOTAL_GC_TIME_%_PS_Scavenge], Time(%), 0.0
+[TOTAL_GCS_PS_MarkSweep], Count, 0
+[TOTAL_GC_TIME_PS_MarkSweep], Time(ms), 0
+[TOTAL_GC_TIME_%_PS_MarkSweep], Time(%), 0.0
+[TOTAL_GCs], Count, 0
+[TOTAL_GC_TIME], Time(ms), 0
+[TOTAL_GC_TIME_%], Time(%), 0.0
+[CLEANUP], Operations, 1
+[CLEANUP], AverageLatency(us), 24536.0
+[CLEANUP], MinLatency(us), 24528
+[CLEANUP], MaxLatency(us), 24543
+[CLEANUP], 95thPercentileLatency(us), 24543
+[CLEANUP], 99thPercentileLatency(us), 24543
+[INSERT], Operations, 1000
+[INSERT], AverageLatency(us), 14176.934
+[INSERT], MinLatency(us), 7740
+[INSERT], MaxLatency(us), 238463
+[INSERT], 95thPercentileLatency(us), 25135
+[INSERT], 99thPercentileLatency(us), 41759
+[INSERT], Return=OK, 1000

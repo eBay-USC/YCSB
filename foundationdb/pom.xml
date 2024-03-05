@@ -42,11 +42,20 @@ LICENSE file.
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.foundationdb</groupId>
       <artifactId>fdb-java</artifactId>
       <version>${foundationdb.version}</version>
-    </dependency>
+    </dependency> -->
+    <!-- https://mvnrepository.com/artifact/org.foundationdb/fdb-java -->
+<dependency>
+    <groupId>org.foundationdb</groupId>
+    <artifactId>fdb-java</artifactId>
+    <version>7.2.5</version>
+    <scope>system</scope>
+    <systemPath>${project.basedir}/fdb-java-7.2.5.jar</systemPath>
+</dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

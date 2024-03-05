@@ -1,0 +1,441 @@
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+normal
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+amd64
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+/lib/linux/amd64/libfdb_c.so
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+start running at 2024.02.21.10:25:22
+amd64
+/lib/linux/amd64/libfdb_java.so
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Open normal subspace
+Finish running at 2024.02.21.10:28:35
+Finish running at 2024.02.21.10:28:51
+Finish running at 2024.02.21.10:28:54
+Finish running at 2024.02.21.10:29:01
+Finish running at 2024.02.21.10:29:01
+Finish running at 2024.02.21.10:29:03
+Finish running at 2024.02.21.10:29:03
+Finish running at 2024.02.21.10:29:04
+Finish running at 2024.02.21.10:29:06
+Finish running at 2024.02.21.10:29:07
+Finish running at 2024.02.21.10:29:07
+Finish running at 2024.02.21.10:29:08
+Finish running at 2024.02.21.10:29:09
+Finish running at 2024.02.21.10:29:09
+Finish running at 2024.02.21.10:29:09
+Finish running at 2024.02.21.10:29:10
+Finish running at 2024.02.21.10:29:10
+Finish running at 2024.02.21.10:29:11
+Finish running at 2024.02.21.10:29:11
+Finish running at 2024.02.21.10:29:12
+Finish running at 2024.02.21.10:29:15
+Finish running at 2024.02.21.10:29:15
+Finish running at 2024.02.21.10:29:16
+Finish running at 2024.02.21.10:29:16
+Finish running at 2024.02.21.10:29:16
+Finish running at 2024.02.21.10:29:18
+Finish running at 2024.02.21.10:29:19
+Finish running at 2024.02.21.10:29:20
+Finish running at 2024.02.21.10:29:21
+Finish running at 2024.02.21.10:29:21
+Finish running at 2024.02.21.10:29:22
+Finish running at 2024.02.21.10:29:23
+Finish running at 2024.02.21.10:29:24
+Finish running at 2024.02.21.10:29:24
+Finish running at 2024.02.21.10:29:25
+Finish running at 2024.02.21.10:29:25
+Finish running at 2024.02.21.10:29:26
+Finish running at 2024.02.21.10:29:27
+Finish running at 2024.02.21.10:29:27
+Finish running at 2024.02.21.10:29:27
+Finish running at 2024.02.21.10:29:28
+Finish running at 2024.02.21.10:29:28
+Finish running at 2024.02.21.10:29:28
+Finish running at 2024.02.21.10:29:28
+Finish running at 2024.02.21.10:29:29
+Finish running at 2024.02.21.10:29:29
+Finish running at 2024.02.21.10:29:29
+Finish running at 2024.02.21.10:29:30
+Finish running at 2024.02.21.10:29:31
+Finish running at 2024.02.21.10:29:31
+Finish running at 2024.02.21.10:29:32
+Finish running at 2024.02.21.10:29:33
+Finish running at 2024.02.21.10:29:33
+Finish running at 2024.02.21.10:29:34
+Finish running at 2024.02.21.10:29:35
+Finish running at 2024.02.21.10:29:35
+Finish running at 2024.02.21.10:29:35
+Finish running at 2024.02.21.10:29:35
+Finish running at 2024.02.21.10:29:35
+Finish running at 2024.02.21.10:29:35
+Finish running at 2024.02.21.10:29:35
+Finish running at 2024.02.21.10:29:36
+Finish running at 2024.02.21.10:29:36
+Finish running at 2024.02.21.10:29:37
+Finish running at 2024.02.21.10:29:37
+Finish running at 2024.02.21.10:29:38
+Finish running at 2024.02.21.10:29:38
+Finish running at 2024.02.21.10:29:39
+Finish running at 2024.02.21.10:29:39
+Finish running at 2024.02.21.10:29:40
+Finish running at 2024.02.21.10:29:40
+Finish running at 2024.02.21.10:29:41
+Finish running at 2024.02.21.10:29:41
+Finish running at 2024.02.21.10:29:41
+Finish running at 2024.02.21.10:29:41
+Finish running at 2024.02.21.10:29:42
+Finish running at 2024.02.21.10:29:42
+Finish running at 2024.02.21.10:29:42
+Finish running at 2024.02.21.10:29:43
+Finish running at 2024.02.21.10:29:43
+Finish running at 2024.02.21.10:29:43
+Finish running at 2024.02.21.10:29:44
+Finish running at 2024.02.21.10:29:44
+Finish running at 2024.02.21.10:29:45
+Finish running at 2024.02.21.10:29:46
+Finish running at 2024.02.21.10:29:46
+Finish running at 2024.02.21.10:29:46
+Finish running at 2024.02.21.10:29:46
+Finish running at 2024.02.21.10:29:46
+Finish running at 2024.02.21.10:29:46
+Finish running at 2024.02.21.10:29:47
+Finish running at 2024.02.21.10:29:48
+Finish running at 2024.02.21.10:29:49
+Finish running at 2024.02.21.10:29:49
+Finish running at 2024.02.21.10:29:49
+Finish running at 2024.02.21.10:29:49
+Finish running at 2024.02.21.10:29:54
+Finish running at 2024.02.21.10:29:54
+Finish running at 2024.02.21.10:29:54
+Finish running at 2024.02.21.10:29:54
+[OVERALL], RunTime(ms), 272091
+[OVERALL], Throughput(ops/sec), 1837.6205019644162
+[TOTAL_GCS_PS_Scavenge], Count, 153
+[TOTAL_GC_TIME_PS_Scavenge], Time(ms), 1767
+[TOTAL_GC_TIME_%_PS_Scavenge], Time(%), 0.6494150853942248
+[TOTAL_GCS_PS_MarkSweep], Count, 0
+[TOTAL_GC_TIME_PS_MarkSweep], Time(ms), 0
+[TOTAL_GC_TIME_%_PS_MarkSweep], Time(%), 0.0
+[TOTAL_GCs], Count, 153
+[TOTAL_GC_TIME], Time(ms), 1767
+[TOTAL_GC_TIME_%], Time(%), 0.6494150853942248
+[READ], Operations, 500000
+[READ], AverageLatency(us), 4273.369958
+[READ], MinLatency(us), 1046
+[READ], MaxLatency(us), 2207743
+[READ], 95thPercentileLatency(us), 6347
+[READ], 99thPercentileLatency(us), 14143
+[READ], Return=OK, 500000
+[READ-MODIFY-WRITE], Operations, 250494
+[READ-MODIFY-WRITE], AverageLatency(us), 93959.5659057702
+[READ-MODIFY-WRITE], MinLatency(us), 6708
+[READ-MODIFY-WRITE], MaxLatency(us), 57737215
+[READ-MODIFY-WRITE], 95thPercentileLatency(us), 99519
+[READ-MODIFY-WRITE], 99thPercentileLatency(us), 1412095
+[CLEANUP], Operations, 100
+[CLEANUP], AverageLatency(us), 102820.16
+[CLEANUP], MinLatency(us), 664
+[CLEANUP], MaxLatency(us), 199935
+[CLEANUP], 95thPercentileLatency(us), 185855
+[CLEANUP], 99thPercentileLatency(us), 197119
+[UPDATE], Operations, 250494
+[UPDATE], AverageLatency(us), 89629.57681221905
+[UPDATE], MinLatency(us), 5024
+[UPDATE], MaxLatency(us), 57737215
+[UPDATE], 95thPercentileLatency(us), 93375
+[UPDATE], 99thPercentileLatency(us), 1370111
+[UPDATE], Return=OK, 250494

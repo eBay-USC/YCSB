@@ -1,0 +1,507 @@
+Killing process with PID 
+Failed to kill process
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (122797856274)
+Killing process with PID 201139
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (122959146849)
+Killing process with PID 201216
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (123121062873)
+Killing process with PID 201291
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (123382342474)
+Killing process with PID 201358
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (123642424296)
+Killing process with PID 201427
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (123801730203)
+Killing process with PID 201494
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (123964611429)
+Killing process with PID 201559
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (124223455152)
+Killing process with PID 201626
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (124483050609)
+Killing process with PID 201693
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (124642719939)
+Killing process with PID 201761
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (124806259957)
+Killing process with PID 201831
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (125065676204)
+Killing process with PID 201898
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (125325647075)
+Killing process with PID 201969
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (125485796843)
+Killing process with PID 202039
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (125646781023)
+Killing process with PID 202104
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (125906669610)
+Killing process with PID 202172
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (126166078138)
+Killing process with PID 202250
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (126323231770)
+Killing process with PID 202314
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (126481128735)
+Killing process with PID 202382
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (126741006104)
+Killing process with PID 202480
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (127004199545)
+Killing process with PID 202547
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (127166501679)
+Killing process with PID 202612
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (127330293400)
+Killing process with PID 202681
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (127593931572)
+Killing process with PID 202747
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (127845501917)
+Killing process with PID 202823
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (127998638526)
+Killing process with PID 202888
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (128150033522)
+Killing process with PID 202962
+###### Running workloada with database foundationdb+ sqlite with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloada with database foundationdb+ sqlite with cache on 10thread ###
+###### Finish worka with database foundationdbwith sqlite with cache
+###### Running workloada with database foundationdb+ redis with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloada with database foundationdb+ redis with cache on 10thread ###
+###### Finish worka with database foundationdbwith redis with cache
+###### Running workloada with database foundationdb+ memcached with cache on 10thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloada with database foundationdb+ memcached with cache on 10thread ###
+###### Finish worka with database foundationdbwith memcached with cache
+###### Running workloada with database foundationdb+ memory with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloada with database foundationdb+ memory with cache on 10thread ###
+###### Finish worka with database foundationdbwith memory with cache
+###### Running workloadb with database foundationdb+ sqlite with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadb with database foundationdb+ sqlite with cache on 10thread ###
+###### Finish workb with database foundationdbwith sqlite with cache
+###### Running workloadb with database foundationdb+ redis with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadb with database foundationdb+ redis with cache on 10thread ###
+###### Finish workb with database foundationdbwith redis with cache
+###### Running workloadb with database foundationdb+ memcached with cache on 10thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadb with database foundationdb+ memcached with cache on 10thread ###
+###### Finish workb with database foundationdbwith memcached with cache
+###### Running workloadb with database foundationdb+ memory with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadb with database foundationdb+ memory with cache on 10thread ###
+###### Finish workb with database foundationdbwith memory with cache
+###### Running workloadc with database foundationdb+ sqlite with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadc with database foundationdb+ sqlite with cache on 10thread ###
+###### Finish workc with database foundationdbwith sqlite with cache
+###### Running workloadc with database foundationdb+ redis with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadc with database foundationdb+ redis with cache on 10thread ###
+###### Finish workc with database foundationdbwith redis with cache
+###### Running workloadc with database foundationdb+ memcached with cache on 10thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadc with database foundationdb+ memcached with cache on 10thread ###
+###### Finish workc with database foundationdbwith memcached with cache
+###### Running workloadc with database foundationdb+ memory with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadc with database foundationdb+ memory with cache on 10thread ###
+###### Finish workc with database foundationdbwith memory with cache
+###### Running workloadd with database foundationdb+ sqlite with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadd with database foundationdb+ sqlite with cache on 10thread ###
+###### Finish workd with database foundationdbwith sqlite with cache
+###### Running workloadd with database foundationdb+ redis with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadd with database foundationdb+ redis with cache on 10thread ###
+###### Finish workd with database foundationdbwith redis with cache
+###### Running workloadd with database foundationdb+ memcached with cache on 10thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadd with database foundationdb+ memcached with cache on 10thread ###
+###### Finish workd with database foundationdbwith memcached with cache
+###### Running workloadd with database foundationdb+ memory with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadd with database foundationdb+ memory with cache on 10thread ###
+###### Finish workd with database foundationdbwith memory with cache
+###### Running workloade with database foundationdb+ sqlite with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloade with database foundationdb+ sqlite with cache on 10thread ###
+###### Finish worke with database foundationdbwith sqlite with cache
+###### Running workloade with database foundationdb+ redis with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloade with database foundationdb+ redis with cache on 10thread ###
+###### Finish worke with database foundationdbwith redis with cache
+###### Running workloade with database foundationdb+ memcached with cache on 10thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloade with database foundationdb+ memcached with cache on 10thread ###
+###### Finish worke with database foundationdbwith memcached with cache
+###### Running workloade with database foundationdb+ memory with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloade with database foundationdb+ memory with cache on 10thread ###
+###### Finish worke with database foundationdbwith memory with cache
+###### Running workloadf with database foundationdb+ sqlite with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadf with database foundationdb+ sqlite with cache on 10thread ###
+###### Finish workf with database foundationdbwith sqlite with cache
+###### Running workloadf with database foundationdb+ redis with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadf with database foundationdb+ redis with cache on 10thread ###
+###### Finish workf with database foundationdbwith redis with cache
+###### Running workloadf with database foundationdb+ memcached with cache on 10thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadf with database foundationdb+ memcached with cache on 10thread ###
+###### Finish workf with database foundationdbwith memcached with cache
+###### Running workloadf with database foundationdb+ memory with cache on 10thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadf with database foundationdb+ memory with cache on 10thread ###
+###### Finish workf with database foundationdbwith memory with cache
+###### Running workloada with database foundationdb+ sqlite with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloada with database foundationdb+ sqlite with cache on 100thread ###
+###### Finish worka with database foundationdbwith sqlite with cache
+###### Running workloada with database foundationdb+ redis with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloada with database foundationdb+ redis with cache on 100thread ###
+###### Finish worka with database foundationdbwith redis with cache
+###### Running workloada with database foundationdb+ memcached with cache on 100thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloada with database foundationdb+ memcached with cache on 100thread ###
+###### Finish worka with database foundationdbwith memcached with cache
+###### Running workloada with database foundationdb+ memory with cache on 100thread ###
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (128400572761)
+Killing process with PID 203029
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (128670987708)
+Killing process with PID 203098
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (128826213182)
+Killing process with PID 203165
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (128973552624)
+Killing process with PID 203228
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (129219852638)
+Killing process with PID 203304
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (129470267921)
+Killing process with PID 203371
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (129620627605)
+Killing process with PID 203437
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (129769952770)
+Killing process with PID 203506
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (130016853460)
+Killing process with PID 203573
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (130263244389)
+Killing process with PID 203637
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (130408659783)
+Killing process with PID 203703
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (130554731116)
+Killing process with PID 203769
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (130800725222)
+Killing process with PID 203834
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (131056927559)
+Killing process with PID 203900
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (131210949925)
+Killing process with PID 203971
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (131366216892)
+Killing process with PID 204037
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (131621802880)
+Killing process with PID 204102
+>>> writemode on
+>>> configure ssd
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (131873467014)
+Killing process with PID 204167
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (132025114148)
+Killing process with PID 204234
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (132178279704)
+Killing process with PID 204300
+>>> writemode on
+>>> configure memory
+Configuration changed
+>>> writemode on
+>>> clearrange 0x00 0xff
+Committed (132430561503)
+Killing process with PID 204368
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloada with database foundationdb+ memory with cache on 100thread ###
+###### Finish worka with database foundationdbwith memory with cache
+###### Running workloadb with database foundationdb+ sqlite with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadb with database foundationdb+ sqlite with cache on 100thread ###
+###### Finish workb with database foundationdbwith sqlite with cache
+###### Running workloadb with database foundationdb+ redis with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadb with database foundationdb+ redis with cache on 100thread ###
+###### Finish workb with database foundationdbwith redis with cache
+###### Running workloadb with database foundationdb+ memcached with cache on 100thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadb with database foundationdb+ memcached with cache on 100thread ###
+###### Finish workb with database foundationdbwith memcached with cache
+###### Running workloadb with database foundationdb+ memory with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadb with database foundationdb+ memory with cache on 100thread ###
+###### Finish workb with database foundationdbwith memory with cache
+###### Running workloadc with database foundationdb+ sqlite with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadc with database foundationdb+ sqlite with cache on 100thread ###
+###### Finish workc with database foundationdbwith sqlite with cache
+###### Running workloadc with database foundationdb+ redis with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadc with database foundationdb+ redis with cache on 100thread ###
+###### Finish workc with database foundationdbwith redis with cache
+###### Running workloadc with database foundationdb+ memcached with cache on 100thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadc with database foundationdb+ memcached with cache on 100thread ###
+###### Finish workc with database foundationdbwith memcached with cache
+###### Running workloadc with database foundationdb+ memory with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadc with database foundationdb+ memory with cache on 100thread ###
+###### Finish workc with database foundationdbwith memory with cache
+###### Running workloadd with database foundationdb+ sqlite with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadd with database foundationdb+ sqlite with cache on 100thread ###
+###### Finish workd with database foundationdbwith sqlite with cache
+###### Running workloadd with database foundationdb+ redis with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadd with database foundationdb+ redis with cache on 100thread ###
+###### Finish workd with database foundationdbwith redis with cache
+###### Running workloadd with database foundationdb+ memcached with cache on 100thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadd with database foundationdb+ memcached with cache on 100thread ###
+###### Finish workd with database foundationdbwith memcached with cache
+###### Running workloadd with database foundationdb+ memory with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadd with database foundationdb+ memory with cache on 100thread ###
+###### Finish workd with database foundationdbwith memory with cache
+###### Running workloade with database foundationdb+ sqlite with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloade with database foundationdb+ sqlite with cache on 100thread ###
+###### Finish worke with database foundationdbwith sqlite with cache
+###### Running workloade with database foundationdb+ redis with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloade with database foundationdb+ redis with cache on 100thread ###
+###### Finish worke with database foundationdbwith redis with cache
+###### Running workloade with database foundationdb+ memcached with cache on 100thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloade with database foundationdb+ memcached with cache on 100thread ###
+###### Finish worke with database foundationdbwith memcached with cache
+###### Running workloade with database foundationdb+ memory with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloade with database foundationdb+ memory with cache on 100thread ###
+###### Finish worke with database foundationdbwith memory with cache
+###### Running workloadf with database foundationdb+ sqlite with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadf with database foundationdb+ sqlite with cache on 100thread ###
+###### Finish workf with database foundationdbwith sqlite with cache
+###### Running workloadf with database foundationdb+ redis with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadf with database foundationdb+ redis with cache on 100thread ###
+###### Finish workf with database foundationdbwith redis with cache
+###### Running workloadf with database foundationdb+ memcached with cache on 100thread ###
+start runing //users/gyming/fdb//memcached/run.sh
+###### Finish loading workloadf with database foundationdb+ memcached with cache on 100thread ###
+###### Finish workf with database foundationdbwith memcached with cache
+###### Running workloadf with database foundationdb+ memory with cache on 100thread ###
+start runing //users/gyming/fdb//redis/run.sh
+###### Finish loading workloadf with database foundationdb+ memory with cache on 100thread ###
+###### Finish workf with database foundationdbwith memory with cache
+Summary:
+foundationdb cached with sqlite on workloada 10thread take, 63.581786155700684s
+foundationdb cached with redis on workloada 10thread take, 63.471275091171265s
+foundationdb cached with memcached on workloada 10thread take, 63.82291531562805s
+foundationdb cached with memory on workloada 10thread take, 63.36452054977417s
+foundationdb cached with sqlite on workloadb 10thread take, 62.181795597076416s
+foundationdb cached with redis on workloadb 10thread take, 61.20582413673401s
+foundationdb cached with memcached on workloadb 10thread take, 64.8808069229126s
+foundationdb cached with memory on workloadb 10thread take, 61.580084562301636s
+foundationdb cached with sqlite on workloadc 10thread take, 61.62330436706543s
+foundationdb cached with redis on workloadc 10thread take, 61.49622869491577s
+foundationdb cached with memcached on workloadc 10thread take, 65.35613822937012s
+foundationdb cached with memory on workloadc 10thread take, 63.098124980926514s
+foundationdb cached with sqlite on workloadd 10thread take, 61.95706272125244s
+foundationdb cached with redis on workloadd 10thread take, 62.03496479988098s
+foundationdb cached with memcached on workloadd 10thread take, 62.7642297744751s
+foundationdb cached with memory on workloadd 10thread take, 62.1517391204834s
+foundationdb cached with sqlite on workloade 10thread take, 61.24017930030823s
+foundationdb cached with redis on workloade 10thread take, 59.566012144088745s
+foundationdb cached with memcached on workloade 10thread take, 60.38427805900574s
+foundationdb cached with memory on workloade 10thread take, 61.8873028755188s
+foundationdb cached with sqlite on workloadf 10thread take, 65.06510782241821s
+foundationdb cached with redis on workloadf 10thread take, 64.25416469573975s
+foundationdb cached with memcached on workloadf 10thread take, 65.77098417282104s
+foundationdb cached with memory on workloadf 10thread take, 67.44399356842041s
+foundationdb cached with sqlite on workloada 100thread take, 53.6103093624115s
+foundationdb cached with redis on workloada 100thread take, 56.217591762542725s
+foundationdb cached with memcached on workloada 100thread take, 53.34987473487854s
+foundationdb cached with memory on workloada 100thread take, 77.66509222984314s
+foundationdb cached with sqlite on workloadb 100thread take, 58.85013818740845s
+foundationdb cached with redis on workloadb 100thread take, 48.23602914810181s
+foundationdb cached with memcached on workloadb 100thread take, 49.48973035812378s
+foundationdb cached with memory on workloadb 100thread take, 53.53820180892944s
+foundationdb cached with sqlite on workloadc 100thread take, 54.01477861404419s
+foundationdb cached with redis on workloadc 100thread take, 48.77717614173889s
+foundationdb cached with memcached on workloadc 100thread take, 51.19509983062744s
+foundationdb cached with memory on workloadc 100thread take, 49.11675572395325s
+foundationdb cached with sqlite on workloadd 100thread take, 48.506349325180054s
+foundationdb cached with redis on workloadd 100thread take, 47.55443501472473s
+foundationdb cached with memcached on workloadd 100thread take, 48.2464804649353s
+foundationdb cached with memory on workloadd 100thread take, 48.06353712081909s
+foundationdb cached with sqlite on workloade 100thread take, 58.252320289611816s
+foundationdb cached with redis on workloade 100thread take, 56.12878394126892s
+foundationdb cached with memcached on workloade 100thread take, 57.55836367607117s
+foundationdb cached with memory on workloade 100thread take, 58.271064043045044s
+foundationdb cached with sqlite on workloadf 100thread take, 53.691691637039185s
+foundationdb cached with redis on workloadf 100thread take, 53.66707897186279s
+foundationdb cached with memcached on workloadf 100thread take, 55.06329536437988s
+foundationdb cached with memory on workloadf 100thread take, 54.26518940925598s

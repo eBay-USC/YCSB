@@ -1,0 +1,30 @@
+normal
+amd64
+/lib/linux/amd64/libfdb_c.so
+amd64
+/lib/linux/amd64/libfdb_java.so
+cleanup here
+[OVERALL], RunTime(ms), 559
+[OVERALL], Throughput(ops/sec), 17.88908765652952
+[TOTAL_GCS_PS_Scavenge], Count, 0
+[TOTAL_GC_TIME_PS_Scavenge], Time(ms), 0
+[TOTAL_GC_TIME_%_PS_Scavenge], Time(%), 0.0
+[TOTAL_GCS_PS_MarkSweep], Count, 0
+[TOTAL_GC_TIME_PS_MarkSweep], Time(ms), 0
+[TOTAL_GC_TIME_%_PS_MarkSweep], Time(%), 0.0
+[TOTAL_GCs], Count, 0
+[TOTAL_GC_TIME], Time(ms), 0
+[TOTAL_GC_TIME_%], Time(%), 0.0
+[CLEANUP], Operations, 1
+[CLEANUP], AverageLatency(us), 87392.0
+[CLEANUP], MinLatency(us), 87360
+[CLEANUP], MaxLatency(us), 87423
+[CLEANUP], 95thPercentileLatency(us), 87423
+[CLEANUP], 99thPercentileLatency(us), 87423
+[INSERT], Operations, 10
+[INSERT], AverageLatency(us), 9582.6
+[INSERT], MinLatency(us), 8140
+[INSERT], MaxLatency(us), 15935
+[INSERT], 95thPercentileLatency(us), 15935
+[INSERT], 99thPercentileLatency(us), 15935
+[INSERT], Return=OK, 10

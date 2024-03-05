@@ -19,6 +19,10 @@ package site.ycsb.db.foundationdb;
 
 import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
+import com.apple.foundationdb.directory.DirectoryLayer;
+import com.apple.foundationdb.directory.DirectorySubspace;
+import com.apple.foundationdb.directory.PathUtil;
+import com.apple.foundationdb.tuple.ByteArrayUtil;
 import com.apple.foundationdb.tuple.Tuple;
 
 import site.ycsb.*;
@@ -26,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -39,19 +44,29 @@ public class FoundationDBClient extends DB {
   private int batchSize;
   private int batchCount;
   private static final String API_VERSION          = "foundationdb.apiversion";
-  private static final String API_VERSION_DEFAULT  = "520";
+  private static final String SUSPACE              = "foundationdb.subspace";
+  private static final String SUBSPACE_DEFAULT     = "cache";
+  private static final String API_VERSION_DEFAULT  = "710";
   private static final String CLUSTER_FILE         = "foundationdb.clusterfile";
-  private static final String CLUSTER_FILE_DEFAULT = "./fdb.cluster";
+  private static final String CLUSTER_FILE_DEFAULT = "/etc/foundationdb/fdb.cluster";
   private static final String DB_NAME              = "foundationdb.dbname";
   private static final String DB_NAME_DEFAULT      = "DB";
   private static final String DB_BATCH_SIZE_DEFAULT = "0";
+  // private static final String READ_VERSION         ="foundationdb.readversion";
+  // private static final String READ_VERSION_DEFAULT = "fresh";   
   private static final String DB_BATCH_SIZE         = "foundationdb.batchsize";
-
   private Vector<String> batchKeys;
   private Vector<Map<String, ByteIterator>> batchValues;
-
+  private DirectorySubspace subspace;
+  private FoundationDBGetReadVersionWorker worker;
+  // private boolean useNewestVersion; 
   private static Logger logger = LoggerFactory.getLogger(FoundationDBClient.class);
-
+  private static synchronized  FDB getOrSelectFdb(int version){
+    if(FDB.isAPIVersionSelected()) {
+      return FDB.instance();
+    }
+    return FDB.selectAPIVersion(version);
+  }
   /**
    * Initialize any state for this DB. Called once per DB instance; there is one DB instance per client thread.
    */
@@ -59,26 +74,44 @@ public class FoundationDBClient extends DB {
   public void init() throws DBException {
     // initialize FoundationDB driver
     final Properties props = getProperties();
+    String subspaceType = props.getProperty(SUSPACE, SUBSPACE_DEFAULT);
+    System.out.println(subspaceType);
     String apiVersion = props.getProperty(API_VERSION, API_VERSION_DEFAULT);
     String clusterFile = props.getProperty(CLUSTER_FILE, CLUSTER_FILE_DEFAULT);
     String dbBatchSize = props.getProperty(DB_BATCH_SIZE, DB_BATCH_SIZE_DEFAULT);
+    // String readVersion = props.getProperty(READ_VERSION, READ_VERSION_DEFAULT);
+    // useNewestVersion = "fresh".equals(readVersion)?true:false;
     dbName = props.getProperty(DB_NAME, DB_NAME_DEFAULT);
-
     logger.info("API Version: {}", apiVersion);
     logger.info("Cluster File: {}\n", clusterFile);
-
+    String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH:mm:ss").format(new java.util.Date());
+    System.out.println("start running at "+timeStamp);
     try {
-      fdb = FDB.selectAPIVersion(Integer.parseInt(apiVersion.trim()));
+      
+      fdb = getOrSelectFdb(710);
       db = fdb.open(clusterFile);
       batchSize = Integer.parseInt(dbBatchSize);
       batchCount = 0;
       batchKeys = new Vector<String>(batchSize+1);
       batchValues = new Vector<Map<String, ByteIterator>>(batchSize+1);
+      if(subspaceType.equals("cache")){
+        subspace = DirectoryLayer.getDefault().createOrOpenCache(db, PathUtil.from("cache")).join();
+        System.out.println("Open cache subspace");
+      } else {
+        subspace = DirectoryLayer.getDefault().createOrOpen(db, PathUtil.from("normal")).join();
+        System.out.println("Open normal subspace");
+      }  
+      worker = new FoundationDBGetReadVersionWorker(db, 200);
+      worker.start();
+      Thread.sleep(200);
     } catch (FDBException e) {
       logger.error(MessageFormatter.format("Error in database operation: {}", "init").getMessage(), e);
       throw new DBException(e);
     } catch (NumberFormatException e) {
       logger.error(MessageFormatter.format("Invalid value for apiversion property: {}", apiVersion).getMessage(), e);
+      throw new DBException(e);
+    } catch (InterruptedException e) {
+      logger.error(MessageFormatter.format("Invalid value for readversion thread: {}", apiVersion).getMessage(), e);
       throw new DBException(e);
     }
   }
@@ -90,10 +123,18 @@ public class FoundationDBClient extends DB {
       batchCount = 0;
     }
     try {
+      worker.stopRunning();
+      worker.join();
       db.close();
+      String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH:mm:ss").format(new java.util.Date());
+      System.out.println("Finish running at "+timeStamp);
     } catch (FDBException e) {
       logger.error(MessageFormatter.format("Error in database operation: {}", "cleanup").getMessage(), e);
       throw new DBException(e);
+    } catch (InterruptedException e) {
+      logger.error(MessageFormatter.format("Error in worker operation: {}", "cleanup").getMessage(), e);
+      throw new DBException(e);
+
     }
   }
 
@@ -136,7 +177,9 @@ public class FoundationDBClient extends DB {
               v = v.add(entry.getValue());
               t = t.add(v);
             }
-            tr.set(Tuple.from(batchKeys.get(i)).pack(), t.pack());
+           
+            byte[]cacheKey = subspace.pack(Tuple.from(batchKeys.get(i)));
+            tr.set(cacheKey, t.pack());
           }
           return null;
         });
@@ -182,7 +225,9 @@ public class FoundationDBClient extends DB {
     logger.debug("delete key = {}", rowKey);
     try {
       db.run(tr -> {
-          tr.clear(Tuple.from(rowKey).pack());
+          // byte[]cacheKey = ByteArrayUtil.join(CACHE_PREFIX, Tuple.from(rowKey).pack());
+          byte[]cacheKey =  subspace.pack(Tuple.from(rowKey).pack());
+          tr.clear(cacheKey);
           return null;
         });
       return Status.OK;
@@ -202,7 +247,10 @@ public class FoundationDBClient extends DB {
     logger.debug("read key = {}", rowKey);
     try {
       byte[] row = db.run(tr -> {
-          byte[] r = tr.get(Tuple.from(rowKey).pack()).join();
+          //tr.setReadVersion(worker.getReadVersion());
+          // byte[]cacheKey = ByteArrayUtil.join(CACHE_PREFIX, Tuple.from(rowKey).pack());
+          byte[]cacheKey =  subspace.pack(Tuple.from(rowKey));
+          byte[] r = tr.get(cacheKey).join();
           return r;
         });
       Tuple t = Tuple.fromBytes(row);
@@ -227,10 +275,12 @@ public class FoundationDBClient extends DB {
     logger.debug("update key = {}", rowKey);
     try {
       Status s = db.run(tr -> {
-          byte[] row = tr.get(Tuple.from(rowKey).pack()).join();
+          // byte[]cacheKey = ByteArrayUtil.join(CACHE_PREFIX, Tuple.from(rowKey).pack());
+          byte[]cacheKey =  subspace.pack(Tuple.from(rowKey));
+          byte[] row = tr.get(cacheKey).join();
           Tuple o = Tuple.fromBytes(row);
           if (o.size() == 0) {
-            logger.debug("key not fount: {}", rowKey);
+            logger.debug("key not fount: {}", ByteArrayUtil.printable(cacheKey));
             return Status.NOT_FOUND;
           }
           HashMap<String, ByteIterator> result = new HashMap<>();
@@ -252,7 +302,7 @@ public class FoundationDBClient extends DB {
             v = v.add(entry.getValue());
             t = t.add(v);
           }
-          tr.set(Tuple.from(rowKey).pack(), t.pack());
+          tr.set(cacheKey, t.pack());
           return Status.OK;
         });
       return s;
@@ -270,11 +320,15 @@ public class FoundationDBClient extends DB {
   public Status scan(String table, String startkey, int recordcount, Set<String> fields,
       Vector<HashMap<String, ByteIterator>> result) {
     String startRowKey = getRowKey(dbName, table, startkey);
+    byte[]startCacheKey =  subspace.pack(Tuple.from(startRowKey));
     String endRowKey = getEndRowKey(table);
-    logger.debug("scan key from {} to {} limit {} ", startkey, endRowKey, recordcount);
+    byte[]endCacheKey = subspace.pack(Tuple.from(endRowKey));
+    logger.debug("scan key from {} to {} limit {} ", 
+          ByteArrayUtil.printable(startCacheKey), ByteArrayUtil.printable(endCacheKey), recordcount);
     try (Transaction tr = db.createTransaction()) {
       tr.options().setReadYourWritesDisable();
-      AsyncIterable<KeyValue> entryList = tr.getRange(Tuple.from(startRowKey).pack(), Tuple.from(endRowKey).pack(),
+      //tr.setReadVersion(worker.getReadVersion());
+      AsyncIterable<KeyValue> entryList = tr.getRange(startCacheKey, endCacheKey,
           recordcount > 0 ? recordcount : 0);
       List<KeyValue> entries = entryList.asList().join();
       for (int i = 0; i < entries.size(); ++i) {
@@ -283,7 +337,8 @@ public class FoundationDBClient extends DB {
         if (convTupleToMap(value, fields, map) == Status.OK) {
           result.add(map);
         } else {
-          logger.error("Error scanning keys: from {} to {} limit {} ", startRowKey, endRowKey, recordcount);
+          logger.error("Error scanning keys: from {} to {} limit {} ", 
+                ByteArrayUtil.printable(startCacheKey), ByteArrayUtil.printable(endCacheKey), recordcount);
           return Status.ERROR;
         }
       }
