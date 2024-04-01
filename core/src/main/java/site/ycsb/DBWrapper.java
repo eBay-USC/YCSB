@@ -17,8 +17,6 @@
 
 package site.ycsb;
 
-import java.util.Map;
-
 import site.ycsb.measurements.Measurements;
 import org.apache.htrace.core.TraceScope;
 import org.apache.htrace.core.Tracer;
@@ -52,6 +50,8 @@ public class DBWrapper extends DB {
   private final String scopeStringRead;
   private final String scopeStringScan;
   private final String scopeStringUpdate;
+  private final String scopeStringMultiGet;
+  private final String scopeStringManyGet;
 
   public DBWrapper(final DB db, final Tracer tracer) {
     this.db = db;
@@ -65,6 +65,8 @@ public class DBWrapper extends DB {
     scopeStringRead = simple + "#read";
     scopeStringScan = simple + "#scan";
     scopeStringUpdate = simple + "#update";
+    scopeStringMultiGet = simple +"#multiget";
+    scopeStringManyGet = simple +"#manyget";
   }
 
   /**
@@ -247,6 +249,32 @@ public class DBWrapper extends DB {
       long en = System.nanoTime();
       measure("DELETE", res, ist, st, en);
       measurements.reportStatus("DELETE", res);
+      return res;
+    }
+  }
+
+  public Status multiget(String table,  List<String> keys,  Set<String> fields, 
+                         Map<String, Map<String, ByteIterator>> result) {
+    try (final TraceScope span = tracer.newScope(scopeStringMultiGet)) {
+      long ist = measurements.getIntendedStartTimeNs();
+      long st = System.nanoTime();
+      Status res = db.multiget(table, keys, fields, result);
+      long en = System.nanoTime();
+      measure("MULTIGET", res, ist, st, en);
+      measurements.reportStatus("MULTIGET", res);
+      return res;
+    }
+  }
+
+  public Status manyget(String table,  List<String> keys,  Set<String> fields, 
+                         Map<String, Map<String, ByteIterator>> result) {
+    try (final TraceScope span = tracer.newScope(scopeStringManyGet)) {
+      long ist = measurements.getIntendedStartTimeNs();
+      long st = System.nanoTime();
+      Status res = db.manyget(table, keys, fields, result);
+      long en = System.nanoTime();
+      measure("MANYGET", res, ist, st, en);
+      measurements.reportStatus("MANYGET", res);
       return res;
     }
   }

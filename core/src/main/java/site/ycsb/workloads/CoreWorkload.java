@@ -208,7 +208,7 @@ public class CoreWorkload extends Workload {
   /**
    * The default proportion of transactions that are reads.
    */
-  public static final String READ_PROPORTION_PROPERTY_DEFAULT = "0.95";
+  public static final String READ_PROPORTION_PROPERTY_DEFAULT = "0.0";
 
   /**
    * The name of the property for the proportion of transactions that are updates.
@@ -218,7 +218,7 @@ public class CoreWorkload extends Workload {
   /**
    * The default proportion of transactions that are updates.
    */
-  public static final String UPDATE_PROPORTION_PROPERTY_DEFAULT = "0.05";
+  public static final String UPDATE_PROPORTION_PROPERTY_DEFAULT = "0.0";
 
   /**
    * The name of the property for the proportion of transactions that are inserts.
@@ -239,6 +239,15 @@ public class CoreWorkload extends Workload {
    * The default proportion of transactions that are scans.
    */
   public static final String SCAN_PROPORTION_PROPERTY_DEFAULT = "0.0";
+
+  
+  public static final String MULTIREAD_PROPORTION_PROPERTY = "multigetproportion";
+  
+  public static final String MULTIREAD_PROPORTION_PROPERTY_DEFAULT = "0.0";
+
+  public static final String MANYREAD_PROPORTION_PROPERTY = "manygetproportion";
+
+  public static final String MANYREAD_PROPORTION_PROPERTY_DEFAULT = "0.0";
 
   /**
    * The name of the property for the proportion of transactions that are read-modify-write.
@@ -658,7 +667,7 @@ public class CoreWorkload extends Workload {
     if(operation == null) {
       return false;
     }
-
+    // System.err.println(operation);
     switch (operation) {
     case "READ":
       doTransactionRead(db);
@@ -671,6 +680,12 @@ public class CoreWorkload extends Workload {
       break;
     case "SCAN":
       doTransactionScan(db);
+      break;
+    case "MULTIGET":
+      doTransactionMultiGet(db);
+      break;
+    case "MANYGET":
+      doTransactionManyGet(db);
       break;
     default:
       doTransactionReadModifyWrite(db);
@@ -700,6 +715,28 @@ public class CoreWorkload extends Workload {
       // This assumes that null data is never valid
       verifyStatus = Status.ERROR;
     }
+    long endTime = System.nanoTime();
+    measurements.measure("VERIFY", (int) (endTime - startTime) / 1000);
+    measurements.reportStatus("VERIFY", verifyStatus);
+  }
+
+  protected void verifyRows(Map<String, Map<String, ByteIterator>> cells) {
+    Status verifyStatus = Status.OK;
+    long startTime = System.nanoTime();
+    for(Map.Entry<String, Map<String, ByteIterator>> cell:cells.entrySet()) {
+      if (!cell.getValue().isEmpty()) {
+        for (Map.Entry<String, ByteIterator> entry : cell.getValue().entrySet()) {
+          if (!entry.getValue().toString().equals(buildDeterministicValue(cell.getKey(), entry.getKey()))) {
+            verifyStatus = Status.UNEXPECTED_STATE;
+            break;
+          }
+        }
+      } else {
+        // This assumes that null data is never valid
+        verifyStatus = Status.ERROR;
+      }
+    }
+    
     long endTime = System.nanoTime();
     measurements.measure("VERIFY", (int) (endTime - startTime) / 1000);
     measurements.reportStatus("VERIFY", verifyStatus);
@@ -744,6 +781,82 @@ public class CoreWorkload extends Workload {
     if (dataintegrity) {
       verifyRow(keyname, cells);
     }
+  }
+  public void doTransactionMultiGet(DB db) {
+    // choose a random key
+    
+
+    List<String> keys = new Vector<String>();
+    for(int i=1; i<=10000; i++) {
+      long keynum = nextKeynum();
+      String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+      keys.add(keyname);
+    }
+    
+    HashSet<String> fields = null;
+
+    if (!readallfields) {
+      // read a random field
+      String fieldname = fieldnames.get(fieldchooser.nextValue().intValue());
+
+      fields = new HashSet<String>();
+      fields.add(fieldname);
+    } else if (dataintegrity || readallfieldsbyname) {
+      // pass the full field list if dataintegrity is on for verification
+      fields = new HashSet<String>(fieldnames);
+    }
+
+    Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
+    long ist = measurements.getIntendedStartTimeNs();
+    long st = System.nanoTime();
+    
+    db.multiget(table, keys, fields, cells);
+
+    long en = System.nanoTime();
+    if (dataintegrity) {
+      verifyRows(cells);
+    }
+
+    measurements.measure("MultiGet_lat", (int) ((en - st) / 1000));
+    measurements.measureIntended("MultiGet_lat", (int) ((en - ist) / 1000));
+  }
+
+  public void doTransactionManyGet(DB db) {
+    // choose a random key
+    
+
+    List<String> keys = new Vector<String>();
+    for(int i=1; i<=10000; i++) {
+      long keynum = nextKeynum();
+      String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
+      keys.add(keyname);
+    }
+    
+    HashSet<String> fields = null;
+
+    if (!readallfields) {
+      // read a random field
+      String fieldname = fieldnames.get(fieldchooser.nextValue().intValue());
+
+      fields = new HashSet<String>();
+      fields.add(fieldname);
+    } else if (dataintegrity || readallfieldsbyname) {
+      // pass the full field list if dataintegrity is on for verification
+      fields = new HashSet<String>(fieldnames);
+    }
+
+    Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
+    long ist = measurements.getIntendedStartTimeNs();
+    long st = System.nanoTime();
+    db.manyget(table, keys, fields, cells);
+    long en = System.nanoTime();
+
+    if (dataintegrity) {
+      verifyRows(cells);
+    }
+
+    measurements.measure("ManyGet_lat", (int) ((en - st)/1000));
+    measurements.measureIntended("ManyGet_lat", (int) ((en - ist)/1000));
   }
 
   public void doTransactionReadModifyWrite(DB db) {
@@ -872,7 +985,11 @@ public class CoreWorkload extends Workload {
         p.getProperty(SCAN_PROPORTION_PROPERTY, SCAN_PROPORTION_PROPERTY_DEFAULT));
     final double readmodifywriteproportion = Double.parseDouble(p.getProperty(
         READMODIFYWRITE_PROPORTION_PROPERTY, READMODIFYWRITE_PROPORTION_PROPERTY_DEFAULT));
-
+    final double multigetproportion = Double.parseDouble(p.getProperty(
+        MULTIREAD_PROPORTION_PROPERTY, MULTIREAD_PROPORTION_PROPERTY_DEFAULT));
+    final double manygetproportion = Double.parseDouble(p.getProperty(
+        MANYREAD_PROPORTION_PROPERTY, MANYREAD_PROPORTION_PROPERTY_DEFAULT));
+  
     final DiscreteGenerator operationchooser = new DiscreteGenerator();
     if (readproportion > 0) {
       operationchooser.addValue(readproportion, "READ");
@@ -892,6 +1009,14 @@ public class CoreWorkload extends Workload {
 
     if (readmodifywriteproportion > 0) {
       operationchooser.addValue(readmodifywriteproportion, "READMODIFYWRITE");
+    }
+
+    if (multigetproportion > 0) {
+      operationchooser.addValue(multigetproportion, "MULTIGET");
+    }
+
+    if (manygetproportion > 0) {
+      operationchooser.addValue(manygetproportion, "MANYGET");
     }
     return operationchooser;
   }

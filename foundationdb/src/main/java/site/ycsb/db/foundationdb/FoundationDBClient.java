@@ -32,6 +32,7 @@ import org.slf4j.helpers.MessageFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * FoundationDB client for YCSB framework.
@@ -46,6 +47,7 @@ public class FoundationDBClient extends DB {
   private static final String API_VERSION          = "foundationdb.apiversion";
   private static final String SUSPACE              = "foundationdb.subspace";
   private static final String SUBSPACE_DEFAULT     = "cache";
+  // private static final String SUBSPACE_DEFAULT     = "normal";
   private static final String API_VERSION_DEFAULT  = "710";
   private static final String CLUSTER_FILE         = "foundationdb.clusterfile";
   private static final String CLUSTER_FILE_DEFAULT = "/etc/foundationdb/fdb.cluster";
@@ -166,6 +168,28 @@ public class FoundationDBClient extends DB {
     return Status.OK;
   }
 
+  private Status convTupleToMapList(Tuple tuple, Set<String> fields, 
+        Map<String, Map<String, ByteIterator>> result, String key) {
+    Map<String, ByteIterator> curResult = new HashMap<String, ByteIterator>();
+    for (int i = 0; i < tuple.size(); i++) {
+      Tuple v = tuple.getNestedTuple(i);
+      String field = v.getString(0);
+      String value = v.getString(1);
+      //System.err.println(field + " : " + value);
+      curResult.put(field, new StringByteIterator(value));
+    }
+    if (fields != null) {
+      for (String field : fields) {
+        if (curResult.get(field) == null) {
+          logger.debug("field not fount: {}", field);
+          return Status.NOT_FOUND;
+        }
+      }
+    }
+    result.put(key, curResult);
+    return Status.OK;
+  }
+
   private void batchInsert() {
     try {
       db.run(tr -> {
@@ -269,6 +293,95 @@ public class FoundationDBClient extends DB {
     return Status.ERROR;
   }
 
+  @Override
+  public Status multiget(String table,  List<String> keys,  
+            Set<String> fields, Map<String, Map<String, ByteIterator>> result) {
+    try {
+      List<byte[]> cacheKeys = new Vector<byte[]>();
+      for(String key:keys) {
+        String rowKey = getRowKey(dbName, table, key);
+        byte[]cacheKey =  subspace.pack(Tuple.from(rowKey));
+        cacheKeys.add(cacheKey);
+      }
+      List<KeyValue> keyValues = db.run(tr -> {
+          List<KeyValue> r = tr.getMultiSync(cacheKeys).join();
+          return r;
+        });
+      if(keyValues.size()!=keys.size()) {
+        logger.debug("key not fount: {}", keys);
+        return Status.NOT_FOUND;
+      }
+      for(KeyValue kv:keyValues) {
+        Tuple t = Tuple.fromBytes(kv.getValue());
+        if(convTupleToMapList(t, fields, result, kv.getKey().toString())!=Status.OK) {
+          return Status.NOT_FOUND;
+        }
+      }
+      return Status.OK;
+
+
+    } catch (FDBException e) {
+      // logger.error(MessageFormatter.format("Error reading key: {}", rowKey).getMessage(), e);
+      e.printStackTrace();
+    } catch (Exception e) {
+      // logger.error(MessageFormatter.format("Error reading key: {}", rowKey).getMessage(), e);
+      e.printStackTrace();
+    }
+    return Status.ERROR;
+  }
+
+  @Override
+  public Status manyget(String table,  List<String> keys,  
+            Set<String> fields, Map<String, Map<String, ByteIterator>> result) {
+    try {
+      List<byte[]> cacheKeys = new Vector<byte[]>();
+      for(String key:keys) {
+        String rowKey = getRowKey(dbName, table, key);
+        byte[]cacheKey =  subspace.pack(Tuple.from(rowKey));
+        cacheKeys.add(cacheKey);
+      }
+      
+      List<KeyValue> keyValues = db.run(tr -> {
+          CompletableFuture<byte[]>[] futures = new CompletableFuture[keys.size()];
+          for(int i=0; i<keys.size(); i++) {
+            futures[i] = tr.get(cacheKeys.get(i));
+          }
+          return CompletableFuture.allOf(futures).thenApply(
+            v -> {
+              Vector<KeyValue> list = new Vector<>();
+              try {
+                for (int i=0; i<futures.length; i++) {
+                  list.add(new KeyValue(cacheKeys.get(i), futures[i].get()));
+                }
+              } catch(Exception e) {
+                e.printStackTrace();
+              }
+              return list;
+            }
+          ).join();
+        });
+      if(keyValues.size()!=keys.size()) {
+        logger.debug("key not fount: {}", keys);
+        return Status.NOT_FOUND;
+      }
+      for(KeyValue kv:keyValues) {
+        Tuple t = Tuple.fromBytes(kv.getValue());
+        if(convTupleToMapList(t, fields, result, kv.getKey().toString())!=Status.OK) {
+          return Status.NOT_FOUND;
+        }
+      }
+      return Status.OK;
+
+
+    } catch (FDBException e) {
+      // logger.error(MessageFormatter.format("Error reading key: {}", rowKey).getMessage(), e);
+      e.printStackTrace();
+    } catch (Exception e) {
+      // logger.error(MessageFormatter.format("Error reading key: {}", rowKey).getMessage(), e);
+      e.printStackTrace();
+    }
+    return Status.ERROR;
+  }
   @Override
   public Status update(String table, String key, Map<String, ByteIterator> values) {
     String rowKey = getRowKey(dbName, table, key);
