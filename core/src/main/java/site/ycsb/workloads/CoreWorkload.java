@@ -789,8 +789,6 @@ public class CoreWorkload extends Workload {
   }
   public void doTransactionMultiGet(DB db) {
     // choose a random key
-    
-
     List<String> keys = new Vector<String>();
     for(int i=1; i<=100; i++) {
       long keynum = nextKeynum();
@@ -814,6 +812,10 @@ public class CoreWorkload extends Workload {
     Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
     
     db.multiget(table, keys, fields, cells);
+    for(String key:cells.keySet()){
+      measurements.measure("MULTIGET_"+cells.get(key).size(), 1);
+    }
+    // System.out.println(size);
     int correct = cells.size();
     int miss = keys.size()-correct;
     if (dataintegrity) {
@@ -828,7 +830,7 @@ public class CoreWorkload extends Workload {
     
 
     List<String> keys = new Vector<String>();
-    for(int i=1; i<=10000; i++) {
+    for(int i=1; i<=100; i++) {
       long keynum = nextKeynum();
       String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
       keys.add(keyname);
@@ -849,7 +851,10 @@ public class CoreWorkload extends Workload {
 
     Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
     db.manyget(table, keys, fields, cells);
-
+    
+    for(String key:cells.keySet()){
+      measurements.measure("MANYGET_"+cells.get(key).size(), 1);
+    }
     int correct = cells.size();
     int miss = keys.size()-correct;
     if (dataintegrity) {

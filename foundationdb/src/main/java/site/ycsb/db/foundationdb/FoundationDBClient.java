@@ -170,7 +170,7 @@ public class FoundationDBClient extends DB {
 
   private Status convTupleToMapList(Tuple tuple, Set<String> fields, 
         Map<String, Map<String, ByteIterator>> result, String key) {
-    System.out.println(tuple);
+    // System.out.println(tuple);
     Map<String, ByteIterator> curResult = new HashMap<String, ByteIterator>();
     for (int i = 0; i < tuple.size(); i++) {
       Tuple v = tuple.getNestedTuple(i);
@@ -183,7 +183,7 @@ public class FoundationDBClient extends DB {
       for (String field : fields) {
         if (curResult.get(field) == null) {
           logger.debug("field not fount: {}", field);
-          return Status.NOT_FOUND;
+          //return Status.NOT_FOUND;
         }
       }
     }
