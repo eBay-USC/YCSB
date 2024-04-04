@@ -170,6 +170,7 @@ public class FoundationDBClient extends DB {
 
   private Status convTupleToMapList(Tuple tuple, Set<String> fields, 
         Map<String, Map<String, ByteIterator>> result, String key) {
+    System.out.println(tuple);
     Map<String, ByteIterator> curResult = new HashMap<String, ByteIterator>();
     for (int i = 0; i < tuple.size(); i++) {
       Tuple v = tuple.getNestedTuple(i);
@@ -307,15 +308,19 @@ public class FoundationDBClient extends DB {
           List<KeyValue> r = tr.getMultiSync(cacheKeys).join();
           return r;
         });
+      int flag = 0;
       if(keyValues.size()!=keys.size()) {
         logger.debug("key not fount: {}", keys);
-        return Status.NOT_FOUND;
+        flag = 1;
       }
       for(KeyValue kv:keyValues) {
         Tuple t = Tuple.fromBytes(kv.getValue());
         if(convTupleToMapList(t, fields, result, kv.getKey().toString())!=Status.OK) {
           return Status.NOT_FOUND;
         }
+      }
+      if(flag == 1) {
+        return Status.NOT_FOUND;
       }
       return Status.OK;
 
@@ -364,11 +369,20 @@ public class FoundationDBClient extends DB {
         logger.debug("key not fount: {}", keys);
         return Status.NOT_FOUND;
       }
+      int flag = 0;
       for(KeyValue kv:keyValues) {
+        if(kv.getValue()==null) {
+          flag = 1;
+          logger.debug("key not fount: {}", kv.getKey());
+          continue;
+        }
         Tuple t = Tuple.fromBytes(kv.getValue());
         if(convTupleToMapList(t, fields, result, kv.getKey().toString())!=Status.OK) {
           return Status.NOT_FOUND;
         }
+      }
+      if(flag == 1) {
+        return Status.NOT_FOUND;
       }
       return Status.OK;
 

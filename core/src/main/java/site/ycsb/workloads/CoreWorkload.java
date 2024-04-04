@@ -720,26 +720,31 @@ public class CoreWorkload extends Workload {
     measurements.reportStatus("VERIFY", verifyStatus);
   }
 
-  protected void verifyRows(Map<String, Map<String, ByteIterator>> cells) {
+  protected int verifyRows(Map<String, Map<String, ByteIterator>> cells) {
     Status verifyStatus = Status.OK;
     long startTime = System.nanoTime();
+    int miss = 0;
     for(Map.Entry<String, Map<String, ByteIterator>> cell:cells.entrySet()) {
       if (!cell.getValue().isEmpty()) {
         for (Map.Entry<String, ByteIterator> entry : cell.getValue().entrySet()) {
           if (!entry.getValue().toString().equals(buildDeterministicValue(cell.getKey(), entry.getKey()))) {
+            
             verifyStatus = Status.UNEXPECTED_STATE;
+            miss++;
             break;
           }
         }
       } else {
         // This assumes that null data is never valid
         verifyStatus = Status.ERROR;
+        miss++;
       }
     }
     
     long endTime = System.nanoTime();
     measurements.measure("VERIFY", (int) (endTime - startTime) / 1000);
     measurements.reportStatus("VERIFY", verifyStatus);
+    return miss;
   }
 
   long nextKeynum() {
@@ -787,7 +792,7 @@ public class CoreWorkload extends Workload {
     
 
     List<String> keys = new Vector<String>();
-    for(int i=1; i<=10000; i++) {
+    for(int i=1; i<=100; i++) {
       long keynum = nextKeynum();
       String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
       keys.add(keyname);
@@ -807,18 +812,15 @@ public class CoreWorkload extends Workload {
     }
 
     Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
-    long ist = measurements.getIntendedStartTimeNs();
-    long st = System.nanoTime();
     
     db.multiget(table, keys, fields, cells);
-
-    long en = System.nanoTime();
+    int correct = cells.size();
+    int miss = keys.size()-correct;
     if (dataintegrity) {
-      verifyRows(cells);
+      miss = verifyRows(cells);
     }
-
-    measurements.measure("MultiGet_lat", (int) ((en - st) / 1000));
-    measurements.measureIntended("MultiGet_lat", (int) ((en - ist) / 1000));
+    // measurements.measure("MULTIGET_CORRECT", correct);
+    measurements.measure("MULTIGET_MISS", miss);
   }
 
   public void doTransactionManyGet(DB db) {
@@ -846,17 +848,14 @@ public class CoreWorkload extends Workload {
     }
 
     Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
-    long ist = measurements.getIntendedStartTimeNs();
-    long st = System.nanoTime();
     db.manyget(table, keys, fields, cells);
-    long en = System.nanoTime();
 
+    int correct = cells.size();
+    int miss = keys.size()-correct;
     if (dataintegrity) {
-      verifyRows(cells);
+      correct = verifyRows(cells);
     }
-
-    measurements.measure("ManyGet_lat", (int) ((en - st)/1000));
-    measurements.measureIntended("ManyGet_lat", (int) ((en - ist)/1000));
+    measurements.measure("MANYGET_CORRECT", correct);
   }
 
   public void doTransactionReadModifyWrite(DB db) {
