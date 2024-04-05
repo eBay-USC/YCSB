@@ -19,7 +19,6 @@ package site.ycsb.workloads;
 
 import site.ycsb.*;
 import site.ycsb.generator.*;
-import site.ycsb.generator.UniformLongGenerator;
 import site.ycsb.measurements.Measurements;
 
 import java.io.IOException;
@@ -595,6 +594,46 @@ public class CoreWorkload extends Workload {
   }
 
   /**
+   * Builds values for all fields.
+   */
+  private int numberInsert = 0;
+  private HashMap<String, ByteIterator> buildValuesRandom(String key, long keyID) {
+    this.numberInsert++;
+    int limit = 0; 
+    // if(keyID%3==0) {
+    //   limit = 1;
+    // } else if(keyID%3==1) {
+    //   limit = 5;
+    // } else {
+    //   limit = 10;
+    // }
+    HashMap<String, ByteIterator> values = new HashMap<>();
+    int tot = 1000000;
+    if(this.numberInsert <= tot/3) {
+      limit = 1;
+    } else if(this.numberInsert <= 2*tot/3) {
+      limit = 5;
+    } else if(this.numberInsert <= 3*tot/3) {
+      limit = 10;
+    }
+    for (String fieldkey : fieldnames) {
+      if(limit == 0) {
+        break;
+      }
+      limit--;
+      ByteIterator data;
+      if (dataintegrity) {
+        data = new StringByteIterator(buildDeterministicValue(key, fieldkey));
+      } else {
+        // fill with random data
+        data = new RandomByteIterator(fieldlengthgenerator.nextValue().longValue());
+      }
+      values.put(fieldkey, data);
+    }
+    return values;
+  }
+
+  /**
    * Build a deterministic value given the key information.
    */
   private String buildDeterministicValue(String key, String fieldkey) {
@@ -623,6 +662,7 @@ public class CoreWorkload extends Workload {
     int keynum = keysequence.nextValue().intValue();
     String dbkey = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
     HashMap<String, ByteIterator> values = buildValues(dbkey);
+    // HashMap<String, ByteIterator> values = buildValuesRandom(dbkey, keynum);
 
     Status status;
     int numOfRetries = 0;
@@ -764,7 +804,7 @@ public class CoreWorkload extends Workload {
   public void doTransactionRead(DB db) {
     // choose a random key
     long keynum = nextKeynum();
-
+    
     String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
 
     HashSet<String> fields = null;
@@ -789,8 +829,9 @@ public class CoreWorkload extends Workload {
   }
   public void doTransactionMultiGet(DB db) {
     // choose a random key
+    
     List<String> keys = new Vector<String>();
-    for(int i=1; i<=100; i++) {
+    for(int i=1; i<=10000; i++) {
       long keynum = nextKeynum();
       String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
       keys.add(keyname);
@@ -830,7 +871,7 @@ public class CoreWorkload extends Workload {
     
 
     List<String> keys = new Vector<String>();
-    for(int i=1; i<=100; i++) {
+    for(int i=1; i<=10000; i++) {
       long keynum = nextKeynum();
       String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
       keys.add(keyname);
@@ -860,7 +901,7 @@ public class CoreWorkload extends Workload {
     if (dataintegrity) {
       correct = verifyRows(cells);
     }
-    measurements.measure("MANYGET_CORRECT", correct);
+    measurements.measure("MANYGET_MISS", miss);
   }
 
   public void doTransactionReadModifyWrite(DB db) {
@@ -959,6 +1000,7 @@ public class CoreWorkload extends Workload {
       String dbkey = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
 
       HashMap<String, ByteIterator> values = buildValues(dbkey);
+      // HashMap<String, ByteIterator> values = buildValuesRandom(dbkey, keynum);
       db.insert(table, dbkey, values);
     } finally {
       transactioninsertkeysequence.acknowledge(keynum);
