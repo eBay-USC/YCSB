@@ -46,8 +46,8 @@ public class FoundationDBClient extends DB {
   private int batchCount;
   private static final String API_VERSION          = "foundationdb.apiversion";
   private static final String SUSPACE              = "foundationdb.subspace";
-  private static final String SUBSPACE_DEFAULT     = "cache";
-  // private static final String SUBSPACE_DEFAULT     = "normal";
+  // private static final String SUBSPACE_DEFAULT     = "cache";
+  private static final String SUBSPACE_DEFAULT     = "normal";
   private static final String API_VERSION_DEFAULT  = "710";
   private static final String CLUSTER_FILE         = "foundationdb.clusterfile";
   private static final String CLUSTER_FILE_DEFAULT = "/etc/foundationdb/fdb.cluster";
@@ -57,6 +57,7 @@ public class FoundationDBClient extends DB {
   // private static final String READ_VERSION         ="foundationdb.readversion";
   // private static final String READ_VERSION_DEFAULT = "fresh";   
   private static final String DB_BATCH_SIZE         = "foundationdb.batchsize";
+  public static final LoadBalancePolicy P = LoadBalancePolicy.FIRST;
   private Vector<String> batchKeys;
   private Vector<Map<String, ByteIterator>> batchValues;
   private DirectorySubspace subspace;
@@ -305,7 +306,7 @@ public class FoundationDBClient extends DB {
         cacheKeys.add(cacheKey);
       }
       List<KeyValue> keyValues = db.run(tr -> {
-          List<KeyValue> r = tr.getMultiSync(cacheKeys).join();
+          List<KeyValue> r = tr.getMultiSync(cacheKeys, P).join();
           return r;
         });
       int flag = 0;

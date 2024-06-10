@@ -831,7 +831,7 @@ public class CoreWorkload extends Workload {
     // choose a random key
     
     List<String> keys = new Vector<String>();
-    for(int i=1; i<=10000; i++) {
+    for(int i=1; i<=1000; i++) {
       long keynum = nextKeynum();
       String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
       keys.add(keyname);
@@ -871,7 +871,7 @@ public class CoreWorkload extends Workload {
     
 
     List<String> keys = new Vector<String>();
-    for(int i=1; i<=10000; i++) {
+    for(int i=1; i<=100; i++) {
       long keynum = nextKeynum();
       String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
       keys.add(keyname);
