@@ -39,7 +39,7 @@ public class NugraphClient extends DB {
 
   public synchronized static RemoteNuGraphTraversalSource getInstance(String hostName, String authOverride, String keyspace) {
     if (g == null) {
-      System.out.println("CREATE G");
+
       try {
         AbstractNuGraphConfig config = new CustomNuGraphConfig(
             hostName, hostName, true, authOverride
@@ -91,7 +91,11 @@ public class NugraphClient extends DB {
         .by(__.inV().valueMap()).by(__.valueMap())
         .by(__.outV().valueMap())
         ;
-   // System.out.println( GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()).getScript());
+
+    System.out.println(GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()).getScript());
+    if(log.isDebugEnabled()){
+      log.debug(GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()).getScript());
+    }
     return Status.NOT_IMPLEMENTED;
   }
 
@@ -129,7 +133,10 @@ public class NugraphClient extends DB {
             .by(__.inV().elementMap()))
         .by(__.inV().outE("related_aspect").has("probability",0.02)
             .order().by("probability",Order.desc).dedup().inV().id().fold());
-   // System.out.println( GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()).getScript());
+    //System.out.println(GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()).getScript());
+    if(log.isDebugEnabled()){
+     log.debug(GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()).getScript());
+   }
     return Status.NOT_IMPLEMENTED;
   }
 
@@ -143,9 +150,8 @@ public class NugraphClient extends DB {
   }
   @Override
   public Status delete(String table, String key) {
-    List<String> curParam = paramList.getRandom();
-    String category_id =  curParam.get(1);
-    return Status.OK;
+
+    return Status.NOT_IMPLEMENTED;
   }
 
 
@@ -164,7 +170,7 @@ public class NugraphClient extends DB {
       System.out.println("paramPath: " + paramPath);
       getInstance(hostname, authOverride, keyspace);
       paramList= new AspectGraphParam(paramPath);
-
+      System.out.println(g.V().has("person", "id", 37383395344651L).next());
     } catch (Exception e) {
       throw new DBException(e);
     }
