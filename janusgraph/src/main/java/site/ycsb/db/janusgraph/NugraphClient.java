@@ -27,7 +27,7 @@ public class NugraphClient extends DB {
   private static final Logger log = LoggerFactory.getLogger(NugraphClient.class);
   private static final String HOST_NAME_DEFAULT = "nugraphservice-ngendrtest6-lvs.monstor-internal.svc.27.tess.io";
   private static final String HOST_NAME = "nugraph.hostname";
-  private static final String AUTH_OVERRIDE = "nugraphservice-lvs.monstor-internal.svc.22.tess.io";
+  private static final String AUTH_OVERRIDE = "nugraph.authorityoverride";
   private static final String AUTH_OVERRIDE_DEFAULT = "nugraphservice-lvs.monstor-internal.svc.22.tess.io";
   private static final String KEYSPACE = "nugraph.keyspace";
   private static final String KEYSPACE_DEFAULT = "ldbc_sf_01_b";
