@@ -22,6 +22,7 @@ import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.directory.DirectoryLayer;
 import com.apple.foundationdb.directory.DirectorySubspace;
 import com.apple.foundationdb.directory.PathUtil;
+import com.apple.foundationdb.subspace.Subspace;
 import com.apple.foundationdb.tuple.ByteArrayUtil;
 import com.apple.foundationdb.tuple.Tuple;
 
@@ -30,9 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * FoundationDB client for YCSB framework.
@@ -46,14 +52,17 @@ public class FoundationDBClient extends DB {
   private int batchCount;
   private static final String API_VERSION          = "foundationdb.apiversion";
   private static final String SUSPACE              = "foundationdb.subspace";
-  // private static final String SUBSPACE_DEFAULT     = "cache";
-  private static final String SUBSPACE_DEFAULT     = "normal";
+  private static final AtomicInteger COUNTER = new AtomicInteger(0);
+  private int tid = COUNTER.incrementAndGet() * 100000000;
+  private static final String SUBSPACE_DEFAULT     = "cache";
+  // private static final String SUBSPACE_DEFAULT     = "normal";
   private static final String API_VERSION_DEFAULT  = "710";
   private static final String CLUSTER_FILE         = "foundationdb.clusterfile";
   private static final String CLUSTER_FILE_DEFAULT = "/etc/foundationdb/fdb.cluster";
   private static final String DB_NAME              = "foundationdb.dbname";
   private static final String DB_NAME_DEFAULT      = "DB";
   private static final String DB_BATCH_SIZE_DEFAULT = "0";
+  private static final String TEST = "TEST";
   // private static final String READ_VERSION         ="foundationdb.readversion";
   // private static final String READ_VERSION_DEFAULT = "fresh";   
   private static final String DB_BATCH_SIZE         = "foundationdb.batchsize";
@@ -61,9 +70,24 @@ public class FoundationDBClient extends DB {
   private Vector<String> batchKeys;
   private Vector<Map<String, ByteIterator>> batchValues;
   private DirectorySubspace subspace;
+  private DirectorySubspace subspaceTESTSQLITE;
   private FoundationDBGetReadVersionWorker worker;
   // private boolean useNewestVersion; 
   private static Logger logger = LoggerFactory.getLogger(FoundationDBClient.class);
+  private BufferedWriter logWriter = null;
+  public void log(String logRecord) {
+    try {
+      if(logWriter == null) {
+        String fileName = "TID_" + tid + ".log";
+        logWriter = new BufferedWriter(new FileWriter(fileName, true));
+      }
+      if (logWriter != null) {
+        logWriter.write(logRecord + "\n");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
   private static synchronized  FDB getOrSelectFdb(int version){
     if(FDB.isAPIVersionSelected()) {
       return FDB.instance();
@@ -99,6 +123,7 @@ public class FoundationDBClient extends DB {
       batchValues = new Vector<Map<String, ByteIterator>>(batchSize+1);
       if(subspaceType.equals("cache")){
         subspace = DirectoryLayer.getDefault().createOrOpenCache(db, PathUtil.from("cache")).join();
+        subspaceTESTSQLITE = DirectoryLayer.getDefault().createOrOpen(db, PathUtil.from("normal")).join();
         System.out.println("Open cache subspace");
       } else {
         subspace = DirectoryLayer.getDefault().createOrOpen(db, PathUtil.from("normal")).join();
@@ -126,6 +151,7 @@ public class FoundationDBClient extends DB {
       batchCount = 0;
     }
     try {
+      logWriter.flush();
       worker.stopRunning();
       worker.join();
       db.close();
@@ -138,6 +164,8 @@ public class FoundationDBClient extends DB {
       logger.error(MessageFormatter.format("Error in worker operation: {}", "cleanup").getMessage(), e);
       throw new DBException(e);
 
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -194,6 +222,7 @@ public class FoundationDBClient extends DB {
 
   private void batchInsert() {
     try {
+      long startTime=System.nanoTime();
       db.run(tr -> {
           for (int i = 0; i < batchCount; ++i) {
             Tuple t = new Tuple();
@@ -209,6 +238,30 @@ public class FoundationDBClient extends DB {
           }
           return null;
         });
+      ArrayList<Entity> transEntities= new ArrayList<Entity>();
+      String ycsbKey4 = batchKeys.get(0);
+      ycsbKey4 = SUBSPACE_DEFAULT + "/" + ycsbKey4;
+      
+      Propertyy[] propsYCSB5 = new Propertyy[1];
+      String valueCur;
+      Tuple t = new Tuple();
+      for (Map.Entry<String, String> entry : StringByteIterator.getStringMap(batchValues.get(0)).entrySet()) {
+        Tuple v = new Tuple();
+        v = v.add(entry.getKey());
+        v = v.add(entry.getValue());
+        t = t.add(v);
+      }
+      valueCur = bytesToHex(t.pack());
+      propsYCSB5[0] = new Propertyy("Value", PolygraphHelper.escapeCharacters(valueCur), 'N');
+      Entity eYCSB6 = new Entity(ycsbKey4, "YCSB", propsYCSB5);
+      transEntities.add(eYCSB6);
+
+      long endTime=System.nanoTime();
+      String logRecord = PolygraphHelper.getLogRecordString(
+          'U', "Insert", String.valueOf(tid), startTime, endTime, transEntities);
+      tid = tid + 1;
+      // System.err.println(logRecord);
+      log(logRecord);
     } catch (FDBException e) {
       for (int i = 0; i < batchCount; ++i) {
         logger.error(MessageFormatter.format("Error batch inserting key {}", batchKeys.get(i)).getMessage(), e);
@@ -267,23 +320,69 @@ public class FoundationDBClient extends DB {
     return Status.ERROR;
   }
 
+  public static String bytesToHex(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (byte b : bytes) {
+      if (b >= 32 && b <= 126) {
+        // 可打印的 ASCII 字符
+        sb.append((char) b);
+      } else {
+        // 不可打印字符以十六进制表示
+        sb.append(String.format("\\x%02x", b));
+      }
+    }
+    return sb.toString();
+  }
+
   @Override
   public Status read(String table, String key, Set<String> fields, Map<String, ByteIterator> result) {
     String rowKey = getRowKey(dbName, table, key);
     logger.debug("read key = {}", rowKey);
+    String curType;
+    Subspace curSubspace;
+    if(Math.random() < 0.5) {
+      curSubspace = subspace;
+      curType = "cache/";
+    } else {
+      curSubspace = subspaceTESTSQLITE;
+      curType = "normal/";
+    }
     try {
+      long startTime=System.nanoTime();
       byte[] row = db.run(tr -> {
           //tr.setReadVersion(worker.getReadVersion());
           // byte[]cacheKey = ByteArrayUtil.join(CACHE_PREFIX, Tuple.from(rowKey).pack());
-          byte[]cacheKey =  subspace.pack(Tuple.from(rowKey));
+          byte[]cacheKey =  curSubspace.pack(Tuple.from(rowKey));
           byte[] r = tr.get(cacheKey).join();
           return r;
         });
+      // System.err.println(bytesToHex(subspace.pack(Tuple.from(rowKey))));
       Tuple t = Tuple.fromBytes(row);
       if (t.size() == 0) {
         logger.debug("key not fount: {}", rowKey);
+        
         return Status.NOT_FOUND;
       }
+      // System.err.println(bytesToHex(t.pack()).equals(bytesToHex(row)));
+      ArrayList<Entity> transEntities= new ArrayList<Entity>();
+      
+      String ycsbKey14 = curType + rowKey;
+      Propertyy[] propsYCSB15 = new Propertyy[1];
+      propsYCSB15[0] = new Propertyy("Value", PolygraphHelper.escapeCharacters(bytesToHex(t.pack())), 'R');
+      Entity eYCSB16 = new Entity(ycsbKey14, "YCSB", propsYCSB15);
+      transEntities.add(eYCSB16);
+
+      long endTime=System.nanoTime();
+      String logRecord = PolygraphHelper.getLogRecordString('R', 
+          "Read", String.valueOf(tid), startTime, endTime, transEntities);
+      tid = tid + 1;
+      // System.err.println(logRecord);
+      log(logRecord);
+
+      // if (t.size() == 0) {
+      //   logger.debug("key not fount: {}", rowKey);
+      //   return Status.NOT_FOUND;
+      // }
       return convTupleToMap(t, fields, result);
     } catch (FDBException e) {
       logger.error(MessageFormatter.format("Error reading key: {}", rowKey).getMessage(), e);
@@ -401,10 +500,21 @@ public class FoundationDBClient extends DB {
   public Status update(String table, String key, Map<String, ByteIterator> values) {
     String rowKey = getRowKey(dbName, table, key);
     logger.debug("update key = {}", rowKey);
+    final AtomicReference<String>  prevValue = new AtomicReference<String>(), newValue = new AtomicReference<String>();
+    String curType;
+    Subspace curSubspace;
+    if(Math.random() < 0.5) {
+      curSubspace = subspace;
+      curType = "cache/";
+    } else {
+      curSubspace = subspaceTESTSQLITE;
+      curType = "normal/";
+    }
     try {
+      long startTime=System.nanoTime();
       Status s = db.run(tr -> {
           // byte[]cacheKey = ByteArrayUtil.join(CACHE_PREFIX, Tuple.from(rowKey).pack());
-          byte[]cacheKey =  subspace.pack(Tuple.from(rowKey));
+          byte[]cacheKey =  curSubspace.pack(Tuple.from(rowKey));
           byte[] row = tr.get(cacheKey).join();
           Tuple o = Tuple.fromBytes(row);
           if (o.size() == 0) {
@@ -423,6 +533,7 @@ public class FoundationDBClient extends DB {
               return Status.NOT_FOUND;
             }
           }
+          prevValue.set(bytesToHex(o.pack()));
           Tuple t = new Tuple();
           for (Map.Entry<String, String> entry : StringByteIterator.getStringMap(result).entrySet()) {
             Tuple v = new Tuple();
@@ -431,8 +542,22 @@ public class FoundationDBClient extends DB {
             t = t.add(v);
           }
           tr.set(cacheKey, t.pack());
+          newValue.set(bytesToHex(t.pack()));
           return Status.OK;
         });
+      ArrayList<Entity> transEntities= new ArrayList<Entity>();
+      String ycsbKey9 = curType + rowKey;
+      Propertyy[] propsYCSB10 = new Propertyy[2];
+      propsYCSB10[0] = new Propertyy("Value", PolygraphHelper.escapeCharacters(prevValue.get()), 'R');
+      propsYCSB10[1] = new Propertyy("Value", PolygraphHelper.escapeCharacters(newValue.get()), 'N');
+      Entity eYCSB11 = new Entity(ycsbKey9, "YCSB", propsYCSB10);
+      transEntities.add(eYCSB11);
+      
+      long endTime=System.nanoTime();
+      String logRecord = PolygraphHelper.getLogRecordString('Z', 
+          "ReadModifyWrite", String.valueOf(tid), startTime, endTime, transEntities);
+      tid = tid + 1;
+      log(logRecord);
       return s;
     } catch (FDBException e) {
       logger.error(MessageFormatter.format("Error updating key: {}", rowKey).getMessage(), e);
