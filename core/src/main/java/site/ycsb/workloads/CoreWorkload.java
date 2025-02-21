@@ -21,8 +21,13 @@ import site.ycsb.*;
 import site.ycsb.generator.*;
 import site.ycsb.measurements.Measurements;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * The core benchmark scenario. Represents a set of clients doing simple CRUD operations. The
@@ -390,6 +395,103 @@ public class CoreWorkload extends Workload {
       prekey += '0';
     }
     return prekey + value;
+  }
+
+  private static class QueryStore {
+    // 加载 JSON 文件中所有的查询，假设文件内容是一个 JSON 数组
+    private static final List<JsonNode> QUERIES;
+    
+    static {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        // 注意：这里假设 JSON 文件路径为 "queries.json"，请根据实际情况调整路径
+        QUERIES = mapper.readValue(new File(
+          "/Users/gyming/Documents/USC/YCSB/workloads/aggregated_data_one.json"), 
+          new TypeReference<List<JsonNode>>() {});
+        System.out.println("Size: "+ QUERIES.size());
+      } catch (Exception e) {
+        throw new ExceptionInInitializerError("Load Json File error: " + e.getMessage());
+      }
+    }
+    
+    public static JsonNode getQueryJson(int id) {
+      // 注意 List 下标从 0 开始
+      return QUERIES.get(id - 1);
+    }
+
+    public static String generateGremlinQuery(JsonNode queryNode) {
+      // 从 JSON 中获取 category_id，用于构造 graph_id
+      String categoryId = queryNode.get("category_id").asText();
+      String graphId = "https://site_0_category_" + categoryId + ".aspect.ks.ebay.com";
+      
+      // 获取 resolved_aspects 数组
+      JsonNode aspectsArray = queryNode.get("resolved_aspects");
+      List<String> unionParts = new ArrayList<>();
+      
+      // 为每个 aspect 生成 union 内的部分
+      // for (JsonNode aspectNode : aspectsArray) {
+      String aspect = aspectsArray.asText();
+      String part = "__.V().has(\"graph_id\",\"" + graphId + "\")"
+                      + ".has(\"entity_id\",\"" + aspect + "\")"
+                      + ".limit(1L)";
+      unionParts.add(part);
+      // }
+      
+      // 拼接 union 部分，多个部分用逗号分隔
+      String unionQuery = "g.union(\n    " + String.join(",\n    ", unionParts) + "\n)";
+      
+      // 固定的 coalesce 部分（可根据实际需求进行调整）
+      String coalescePart = ".coalesce(__.local(__.outE(\"related_aspect\")"
+              + ".has(\"probability\",P.gt(0.05))"
+              + ".order().by(\"probability\",Order.desc))"
+              + ".project(\"destinationProps\",\"edgeProps\",\"sourceProps\")"
+              + ".by(__.inV().valueMap(\"entity_id\",\"count\",\"prefLabel\",\"type\",\"image_uri\"))"
+              + ".by(__.valueMap(\"type\",\"probability\"))"
+              + ".by(__.outV().valueMap(\"entity_id\",\"count\",\"prefLabel\",\"type\",\"image_uri\")),"
+              + "__.project(\"sourceProps\")"
+              + ".by(__.valueMap(\"entity_id\",\"count\",\"prefLabel\",\"type\",\"image_uri\"))";
+      
+      return unionQuery + coalescePart;
+    }
+
+    public static String generateGremlinQuery2(JsonNode queryNode) {
+      // 从 JSON 中获取 category_id，用于构造 graph_id
+      String categoryId = queryNode.get("category_id").asText();
+      String graphId = "https://site_0_category_" + categoryId + ".aspect.ks.ebay.com";
+      
+      // 获取 resolved_aspects 数组
+      JsonNode aspectsArray = queryNode.get("resolved_aspects");
+      List<String> unionParts = new ArrayList<>();
+      
+      // 为每个 aspect 生成 union 内的部分
+      // for (JsonNode aspectNode : aspectsArray) {
+      String aspect = aspectsArray.asText();
+      String part = "__.V().has(\"graph_id\",\"" + graphId + "\")"
+                      + ".has(\"entity_id\",\"" + aspect + "\")"
+                      + ".limit(1L)";
+      unionParts.add(part);
+      // }
+      
+      // 拼接 union 部分，多个部分用逗号分隔
+      String unionQuery = "g.union(\n    " + String.join(",\n    ", unionParts) + "\n)";
+      
+      // 固定的 coalesce 部分（可根据实际需求进行调整）
+      String coalescePart = ".local(__.outE(\"related_aspect\").has(\"probability\",P.gt(0.05)).order()" 
+          + ".by(\"probability\",Order.desc)).project(\"outE\",\"backwardV\").by(__.project(\"sourceProperties\","
+          +"\"edgeProps\",\"destinationProperties\").by(__.outV().elementMap()).by(__.elementMap())."
+          +"by(__.inV().elementMap())).by(__.inV().local(__.outE(\"related_aspect\").has(\"probability\","
+          +"P.gt(0.05)).order().by(\"probability\",Order.desc)).dedup().inV().id().fold())";
+      
+      return unionQuery + coalescePart;
+    }
+    
+    public static String getGremlinQuery(int id, int type) {
+      JsonNode queryNode = getQueryJson(id);
+      if(type == 1) {
+        return generateGremlinQuery(queryNode);
+      }
+      return generateGremlinQuery2(queryNode);
+    }
   }
 
   protected static NumberGenerator getFieldLengthGenerator(Properties p) throws WorkloadException {
@@ -801,6 +903,8 @@ public class CoreWorkload extends Workload {
     return keynum;
   }
 
+
+
   public void doTransactionRead(DB db) {
     // choose a random key
     long keynum = nextKeynum();
@@ -830,78 +934,20 @@ public class CoreWorkload extends Workload {
   public void doTransactionMultiGet(DB db) {
     // choose a random key
     
-    List<String> keys = new Vector<String>();
-    for(int i=1; i<=1000; i++) {
-      long keynum = nextKeynum();
-      String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
-      keys.add(keyname);
-    }
-    
-    HashSet<String> fields = null;
-
-    if (!readallfields) {
-      // read a random field
-      String fieldname = fieldnames.get(fieldchooser.nextValue().intValue());
-
-      fields = new HashSet<String>();
-      fields.add(fieldname);
-    } else if (dataintegrity || readallfieldsbyname) {
-      // pass the full field list if dataintegrity is on for verification
-      fields = new HashSet<String>(fieldnames);
-    }
-
+    long keynum = nextKeynum();
+    String query = QueryStore.getGremlinQuery((int)keynum, 0);
     Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
     
-    db.multiget(table, keys, fields, cells);
-    for(String key:cells.keySet()){
-      measurements.measure("MULTIGET_"+cells.get(key).size(), 1);
-    }
-    // System.out.println(size);
-    int correct = cells.size();
-    int miss = keys.size()-correct;
-    if (dataintegrity) {
-      miss = verifyRows(cells);
-    }
-    // measurements.measure("MULTIGET_CORRECT", correct);
-    measurements.measure("MULTIGET_MISS", miss);
+    db.multiget(query, cells);
   }
 
   public void doTransactionManyGet(DB db) {
     // choose a random key
-    
-
-    List<String> keys = new Vector<String>();
-    for(int i=1; i<=100; i++) {
-      long keynum = nextKeynum();
-      String keyname = CoreWorkload.buildKeyName(keynum, zeropadding, orderedinserts);
-      keys.add(keyname);
-    }
-    
-    HashSet<String> fields = null;
-
-    if (!readallfields) {
-      // read a random field
-      String fieldname = fieldnames.get(fieldchooser.nextValue().intValue());
-
-      fields = new HashSet<String>();
-      fields.add(fieldname);
-    } else if (dataintegrity || readallfieldsbyname) {
-      // pass the full field list if dataintegrity is on for verification
-      fields = new HashSet<String>(fieldnames);
-    }
-
+    long keynum = nextKeynum();
+    String query = QueryStore.getGremlinQuery((int)keynum, 1);
     Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
-    db.manyget(table, keys, fields, cells);
     
-    for(String key:cells.keySet()){
-      measurements.measure("MANYGET_"+cells.get(key).size(), 1);
-    }
-    int correct = cells.size();
-    int miss = keys.size()-correct;
-    if (dataintegrity) {
-      correct = verifyRows(cells);
-    }
-    measurements.measure("MANYGET_MISS", miss);
+    db.manyget(query, cells);
   }
 
   public void doTransactionReadModifyWrite(DB db) {

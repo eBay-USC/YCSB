@@ -253,12 +253,12 @@ public class DBWrapper extends DB {
     }
   }
 
-  public Status multiget(String table,  List<String> keys,  Set<String> fields, 
-                         Map<String, Map<String, ByteIterator>> result) {
+  @Override
+  public Status multiget(String query, Map<String, Map<String, ByteIterator>> result) {
     try (final TraceScope span = tracer.newScope(scopeStringMultiGet)) {
       long ist = measurements.getIntendedStartTimeNs();
       long st = System.nanoTime();
-      Status res = db.multiget(table, keys, fields, result);
+      Status res = db.multiget(query, result);
       long en = System.nanoTime();
       measure("MULTIGET", res, ist, st, en);
       measurements.reportStatus("MULTIGET", res);
@@ -266,12 +266,12 @@ public class DBWrapper extends DB {
     }
   }
 
-  public Status manyget(String table,  List<String> keys,  Set<String> fields, 
-                         Map<String, Map<String, ByteIterator>> result) {
+  @Override
+  public Status manyget(String query, Map<String, Map<String, ByteIterator>> result) {
     try (final TraceScope span = tracer.newScope(scopeStringManyGet)) {
       long ist = measurements.getIntendedStartTimeNs();
       long st = System.nanoTime();
-      Status res = db.manyget(table, keys, fields, result);
+      Status res = db.manyget(query, result);
       long en = System.nanoTime();
       measure("MANYGET", res, ist, st, en);
       measurements.reportStatus("MANYGET", res);

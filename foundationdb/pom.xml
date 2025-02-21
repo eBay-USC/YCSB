@@ -48,13 +48,19 @@ LICENSE file.
       <version>${foundationdb.version}</version>
     </dependency> -->
     <!-- https://mvnrepository.com/artifact/org.foundationdb/fdb-java -->
-<dependency>
-    <groupId>org.foundationdb</groupId>
-    <artifactId>fdb-java</artifactId>
-    <version>7.2.5</version>
-    <scope>system</scope>
-    <systemPath>${project.basedir}/fdb-java-7.2.5.jar</systemPath>
-</dependency>
+    <dependency>
+      <groupId>org.foundationdb</groupId>
+      <artifactId>fdb-java</artifactId>
+      <version>7.2.5</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/fdb-java-7.2.5.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.tinkerpop</groupId>
+      <artifactId>gremlin-driver</artifactId>
+      <version>3.5.3</version>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
