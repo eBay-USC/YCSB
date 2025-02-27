@@ -21,13 +21,17 @@ import site.ycsb.*;
 import site.ycsb.generator.*;
 import site.ycsb.measurements.Measurements;
 
-import java.io.File;
+// import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.*;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.type.TypeReference;
+// import org.codehaus.jackson.map.ObjectMapper;
+// import org.codehaus.jackson.JsonNode;
+// import org.codehaus.jackson.type.TypeReference;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 
 /**
  * The core benchmark scenario. Represents a set of clients doing simple CRUD operations. The
@@ -399,26 +403,37 @@ public class CoreWorkload extends Workload {
 
   private static class QueryStore {
     // 加载 JSON 文件中所有的查询，假设文件内容是一个 JSON 数组
-    private static final List<JsonNode> QUERIES;
+    // private static final List<JsonNode> QUERIES;
+    private static final List<String> QUERIES = new ArrayList<>();
     
     static {
       try {
-        ObjectMapper mapper = new ObjectMapper();
-        // 注意：这里假设 JSON 文件路径为 "queries.json"，请根据实际情况调整路径
-        QUERIES = mapper.readValue(new File(
-          "/Users/gyming/Documents/USC/YCSB/workloads/aggregated_data_one.json"), 
-          new TypeReference<List<JsonNode>>() {});
+        // ObjectMapper mapper = new ObjectMapper();
+        // // 注意：这里假设 JSON 文件路径为 "queries.json"，请根据实际情况调整路径
+        // QUERIES = mapper.readValue(new File(
+        //   "/Users/gyming/Documents/USC/YCSB/workloads/aggregated_data_one.json"), 
+        //   new TypeReference<List<JsonNode>>() {});
+        Reader in = new FileReader("/Users/gyming/Documents/USC/YCSB/workloads/sample");
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT
+                    .withHeader("seconds", "query", "queryDurationMs")
+                    .withFirstRecordAsHeader()
+                    .parse(in);
+        for (CSVRecord record : records) {
+          // 获取每行的 query 字段
+          String query = record.get("query");
+          QUERIES.add(query);
+        }
         System.out.println("Size: "+ QUERIES.size());
       } catch (Exception e) {
         throw new ExceptionInInitializerError("Load Json File error: " + e.getMessage());
       }
     }
-    
+    /*
     public static JsonNode getQueryJson(int id) {
       // 注意 List 下标从 0 开始
       return QUERIES.get(id - 1);
     }
-
+    
     public static String generateGremlinQuery(JsonNode queryNode) {
       // 从 JSON 中获取 category_id，用于构造 graph_id
       String categoryId = queryNode.get("category_id").asText();
@@ -492,6 +507,12 @@ public class CoreWorkload extends Workload {
       }
       return generateGremlinQuery2(queryNode);
     }
+    */
+
+    public static String getGremlinQuery(int id, int type) {
+      return QUERIES.get(id);
+    }
+
   }
 
   protected static NumberGenerator getFieldLengthGenerator(Properties p) throws WorkloadException {

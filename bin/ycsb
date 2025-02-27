@@ -71,6 +71,7 @@ DATABASES = {
     "elasticsearch5": "site.ycsb.db.elasticsearch5.ElasticsearchClient",
     "elasticsearch5-rest": "site.ycsb.db.elasticsearch5.ElasticsearchRestClient",
     "foundationdb" : "site.ycsb.db.foundationdb.FoundationDBClient",
+    "janusgraph"   : "site.ycsb.db.janusgraph.JanusgraphClient",
     "geode"        : "site.ycsb.db.GeodeClient",
     "googlebigtable"  : "site.ycsb.db.GoogleBigtableClient",
     "googledatastore" : "site.ycsb.db.GoogleDatastoreClient",

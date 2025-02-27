@@ -172,7 +172,7 @@ LICENSE file.
     <module>dynamodb</module>
     <module>elasticsearch</module>
     <module>elasticsearch5</module>
-    <module>foundationdb</module>
+    <module>janusgraph</module>
     <module>geode</module>
     <module>googlebigtable</module>
     <module>googledatastore</module>
