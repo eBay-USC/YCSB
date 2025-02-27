@@ -18,6 +18,7 @@
 package site.ycsb.db.foundationdb;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,10 +26,17 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
-import org.apache.tinkerpop.gremlin.driver.Client;
-import org.apache.tinkerpop.gremlin.driver.Cluster;
-import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.driver.ResultSet;
+import javax.script.Bindings;
+import javax.script.ScriptException;
+
+
+import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.JanusGraphFactory;
+import org.apache.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngine;
+// import org.apache.tinkerpop.gremlin.groovy.jsr223.GroovyTranslator;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -45,24 +53,85 @@ import site.ycsb.Status;
 public class FoundationDBClient extends DB {
   private static final String API_ADDRESS          = "gremlin.address";
   private static final String API_PORT             = "gremlin.port";
-  private Cluster cluster;
-  private Client client;
-  private static Logger logger = LoggerFactory.getLogger(FoundationDBClient.class);
+  private static final String CONFIG_PATH           = "gremlin.config";
 
-  public List<Result> executeQuery(String gremlinQuery) {
-    ResultSet resultSet = client.submit(gremlinQuery);
-    return resultSet.all().join();
-  }
+  private static Logger logger = LoggerFactory.getLogger(FoundationDBClient.class);
+  private JanusGraph graph = null;
+  private GraphTraversalSource g;
+  private GremlinGroovyScriptEngine gremlinEngine;
+  private Bindings bindings;
+
   /**
    * Initialize any state for this DB. Called once per DB instance; there is one DB instance per client thread.
    */
+  private static void process(String line, int repeat, GremlinGroovyScriptEngine gremlinEngine,
+                                Bindings bindings, GraphTraversalSource g) {
+    String script = line.split(" \\| ")[0];
+
+    // logger.info("Executing script: {} {} times", script, repeat);
+
+    for (int i = 0; i < repeat; ++i) {
+      final Object scriptResult;
+      GraphTraversal gt = null;
+      try {
+        scriptResult = gremlinEngine.eval(script, bindings);
+        if (scriptResult instanceof GraphTraversal) {
+          gt = (GraphTraversal) scriptResult;
+          // log.info("To execute graph traversal: {}", GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()));
+
+          List<?> result = new ArrayList<>();
+          gt.fill(result);
+
+          // log.info("Got result (size={}): ", result.size());
+          // for (Object obj : result) {
+          //     if (obj instanceof Vertex) {
+          //         log.info("Vertex id={}", ((Vertex) obj).id());
+          //     } else if (obj instanceof Edge) {
+          //         log.info("Edge id={}", ((Edge) obj).id());
+          //     } else if (obj instanceof Map) {
+          //         log.info("Map: ");
+          //         Map<?, ?> map = (Map<?, ?>) obj;
+          //         for (Map.Entry<?, ?> entry : map.entrySet()) {
+          //             log.info("  Key={}, Value={}", entry.getKey(), entry.getValue());
+          //         }
+          //     } else {
+          //         log.info("Got {}", obj);
+          //     }
+          // }
+        } else {
+          // log.info("Get script result: {}", scriptResult);
+        }
+        g.tx().commit();
+        // log.info("Transaction committed successfully");
+      } catch (ScriptException e) {
+        logger.error("Could not evaluate script {}", script, e);
+        g.tx().rollback();
+      } catch (Throwable e) {
+        logger.error("Got exception", e);
+        g.tx().rollback();
+      } finally {
+        if (gt != null) {
+          try {
+            gt.close();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+  }
   @Override
   public void init() throws DBException {
     // initialize FoundationDB driver
     final Properties props = getProperties();
     try {
-      cluster = Cluster.build().addContactPoint("localhost").port(8182).create();
-      client = cluster.connect();
+      String janusGraphConfigFile = props.getProperty(CONFIG_PATH, "./config");
+      graph = JanusGraphFactory.open(janusGraphConfigFile);
+      g = graph.traversal();
+      gremlinEngine = new GremlinGroovyScriptEngine();
+      bindings = gremlinEngine.createBindings();
+      bindings.put("g", g);
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -74,7 +143,10 @@ public class FoundationDBClient extends DB {
   public void cleanup() throws DBException {
     try {
       // db.close();
-      cluster.close();
+      g.close();
+      if (graph != null) {
+        graph.close();
+      }
       String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH:mm:ss").format(new java.util.Date());
       System.out.println("Finish running at "+timeStamp);
     } catch (Exception e) {
@@ -101,7 +173,7 @@ public class FoundationDBClient extends DB {
   public Status multiget(String query, Map<String, Map<String, ByteIterator>> result) {
     try {
       System.out.println(query);
-      List<Result> results = executeQuery(query);
+      process(query, 1,gremlinEngine, bindings,g);
       return Status.OK;
 
     } catch (Exception e) {
@@ -115,7 +187,7 @@ public class FoundationDBClient extends DB {
   public Status manyget(String query, Map<String, Map<String, ByteIterator>> result) {
     try {
       System.out.println(query);
-      List<Result> results = executeQuery(query);
+      process(query, 1,gremlinEngine, bindings,g);
       return Status.OK;
 
 
