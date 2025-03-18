@@ -54,8 +54,8 @@ public class FoundationDBClient extends DB {
   private static final String SUSPACE              = "foundationdb.subspace";
   private static final AtomicInteger COUNTER = new AtomicInteger(0);
   private int tid = COUNTER.incrementAndGet() * 100000000;
-  private static final String SUBSPACE_DEFAULT     = "cache";
-  // private static final String SUBSPACE_DEFAULT     = "normal";
+  // private static final String SUBSPACE_DEFAULT     = "cache";
+  private static final String SUBSPACE_DEFAULT     = "normal";
   private static final String API_VERSION_DEFAULT  = "710";
   private static final String CLUSTER_FILE         = "foundationdb.clusterfile";
   private static final String CLUSTER_FILE_DEFAULT = "/etc/foundationdb/fdb.cluster";
@@ -503,7 +503,7 @@ public class FoundationDBClient extends DB {
     final AtomicReference<String>  prevValue = new AtomicReference<String>(), newValue = new AtomicReference<String>();
     String curType;
     Subspace curSubspace;
-    if(Math.random() < 0.5) {
+    if(Math.random() < 0.5 || SUBSPACE_DEFAULT == "normal") {
       curSubspace = subspace;
       curType = "cache/";
     } else {
@@ -513,6 +513,7 @@ public class FoundationDBClient extends DB {
     try {
       long startTime=System.nanoTime();
       Status s = db.run(tr -> {
+          tr.options().setRetryLimit(0);
           // byte[]cacheKey = ByteArrayUtil.join(CACHE_PREFIX, Tuple.from(rowKey).pack());
           byte[]cacheKey =  curSubspace.pack(Tuple.from(rowKey));
           byte[] row = tr.get(cacheKey).join();
