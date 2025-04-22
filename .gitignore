@@ -23,3 +23,7 @@ output*
 # ignore standard Mac OS X files/dirs
 .DS_Store
 /differentbin/
+
+query2aspects_outputfile.parquet/
+workloads/
+.vscode

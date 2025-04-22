@@ -18,6 +18,7 @@
 package site.ycsb;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -133,7 +134,7 @@ public abstract class DB {
    */
   public abstract Status delete(String table, String key);
 
-  public Status multiget(String query, Map<String, Map<String, ByteIterator>> result) {
+  public Status multiget(String[] ignored, List<?> result) {
     return Status.OK;
   }
 

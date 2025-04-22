@@ -22,16 +22,16 @@ import site.ycsb.generator.*;
 import site.ycsb.measurements.Measurements;
 
 // import java.io.File;
-import java.io.FileReader;
+// import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
+// import java.io.Reader;
 import java.util.*;
 
 // import org.codehaus.jackson.map.ObjectMapper;
 // import org.codehaus.jackson.JsonNode;
 // import org.codehaus.jackson.type.TypeReference;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
+// import org.apache.commons.csv.CSVFormat;
+// import org.apache.commons.csv.CSVRecord;
 
 /**
  * The core benchmark scenario. Represents a set of clients doing simple CRUD operations. The
@@ -401,7 +401,7 @@ public class CoreWorkload extends Workload {
     return prekey + value;
   }
 
-  private static class QueryStore {
+  /*private static class QueryStore {
     // 加载 JSON 文件中所有的查询，假设文件内容是一个 JSON 数组
     // private static final List<JsonNode> QUERIES;
     private static final List<String> QUERIES = new ArrayList<>();
@@ -413,7 +413,7 @@ public class CoreWorkload extends Workload {
         // QUERIES = mapper.readValue(new File(
         //   "/Users/gyming/Documents/USC/YCSB/workloads/aggregated_data_one.json"), 
         //   new TypeReference<List<JsonNode>>() {});
-        Reader in = new FileReader("/Users/gyming/Documents/USC/YCSB/workloads/sample");
+        Reader in = new FileReader("/data/sample.csv");
         Iterable<CSVRecord> records = CSVFormat.DEFAULT
                     .withHeader("seconds", "query", "queryDurationMs")
                     .withFirstRecordAsHeader()
@@ -508,12 +508,12 @@ public class CoreWorkload extends Workload {
       return generateGremlinQuery2(queryNode);
     }
     */
-
+    /*
     public static String getGremlinQuery(int id, int type) {
       return QUERIES.get(id);
     }
 
-  }
+  }*/
 
   protected static NumberGenerator getFieldLengthGenerator(Properties p) throws WorkloadException {
     NumberGenerator fieldlengthgenerator;
@@ -956,16 +956,20 @@ public class CoreWorkload extends Workload {
     // choose a random key
     
     long keynum = nextKeynum();
-    String query = QueryStore.getGremlinQuery((int)keynum, 0);
-    Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
-    
-    db.multiget(query, cells);
+    // String query = QueryStore.getGremlinQuery((int)keynum, 0);
+    String query = "aaa";
+    List<?> result = new ArrayList<>();
+
+    String[] ignored = new String[]{"aaa"};
+    db.multiget(ignored, result);
+    measurements.measure("MULTIGET_RESULT_SIZE", result.size());
   }
 
   public void doTransactionManyGet(DB db) {
     // choose a random key
     long keynum = nextKeynum();
-    String query = QueryStore.getGremlinQuery((int)keynum, 1);
+    // String query = QueryStore.getGremlinQuery((int)keynum, 1);
+    String query = "aaa";
     Map<String, Map<String, ByteIterator>> cells = new HashMap<String, Map<String, ByteIterator>>();
     
     db.manyget(query, cells);

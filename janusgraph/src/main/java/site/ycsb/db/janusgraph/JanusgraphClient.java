@@ -17,18 +17,25 @@
 
 package site.ycsb.db.janusgraph;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.script.Bindings;
-import javax.script.ScriptException;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngine;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.nugraph.client.config.AbstractNuGraphConfig;
@@ -48,36 +55,45 @@ import site.ycsb.DBException;
 import site.ycsb.Status;
 
 /**
- * FoundationDB client for YCSB framework.
- */
-
+* Janusgraph client for YCSB framework with CSV query reader.
+*/
 public class JanusgraphClient extends DB {
   private static final String HOST_NAME_DEFAULT = "nugraphservice-testyimingfdbntypes2-lvs-internal.vip.ebay.com";
   private static final String HOST_NAME = "nugraph.hostname";
   private static final String AUTH_OVERRIDE = "nugraph.authorityoverride";
-  private static final String AUTH_OVERRIDE_DEFAULT = "nugraphservice-lvs.monstor-internal.svc.22.tess.io";
+  private static final String AUTH_OVERRIDE_DEFAULT = "nugraphservice-slc.monstor-preprod.svc.23.tess.io";
   private static final String KEYSPACE = "nugraph.keyspace";
   private static final String KEYSPACE_DEFAULT = "ldbc_sf_01_b";
+  // CSV 文件所在目录配置属性
+  private static final String CSV_DIRECTORY = "nugraph.csvdirectory";
+  private static final String CSV_DIRECTORY_DEFAULT = "/data/";
+  private static final String USE_CACHE = "nugraph.usecache";
+  private static final String USE_CACHE_DEFAULT = "true";
 
+  // 使用 BlockingQueue 替代自定义的 QueryBuffer，设置一个合适的容量（例如：1,000,000 条记录）
+  private static final BlockingQueue<String> QUERY = new LinkedBlockingQueue<>(1000000);
 
-  // private static AspectGraphParam paramList;
-  private RemoteNuGraphTraversalSource g;
+  // 静态共享的 CSV 读取线程
+  private static Thread csvReaderThread;
+  // 静态共享的队列监控线程，用于定期打印队列大小
+  private static Thread queueMonitorThread;
+
+  private static RemoteNuGraphTraversalSource g;
   private GremlinGroovyScriptEngine gremlinEngine;
   private Bindings bindings;
-
   private static Logger logger = LoggerFactory.getLogger(JanusgraphClient.class);
+  private String usecache;
 
-  public RemoteNuGraphTraversalSource getInstance(String hostName, 
+  public synchronized RemoteNuGraphTraversalSource getInstance(String hostName, 
       String authOverride, String keyspace) {
     if (g == null) {
-
       try {
         AbstractNuGraphConfig config = new CustomNuGraphConfig(
             hostName, hostName, true, authOverride
         );
         NuGraphConfigManager.setDefaultConfigAndInit("YCSB", config);
 
-        //create remote graph traversal source
+        // 创建远程图遍历源
         HashMap<String, Object> optionsMap = new HashMap<>();
         optionsMap.put(Options.TIMEOUT_IN_MILLIS, 99999);
         optionsMap.put(Options.IS_RETRY_ALLOWED, true);
@@ -90,9 +106,15 @@ public class JanusgraphClient extends DB {
     return g;
   }
 
-  private void process(String line, int repeat) {
+  /**
+  * process 方法：执行 Gremlin 脚本，并将结果填充到传入的 result 列表中.
+  */
+  private Status process(String line, int repeat, List<?> result) {
     String script = line.split(" \\| ")[0];
-
+    if (script.startsWith("g.")) {
+      script = "g.with(\"cache\", " + usecache + ")." + script.substring(2);
+    }
+    // System.out.println(script);
     for (int i = 0; i < repeat; ++i) {
       final Object scriptResult;
       GraphTraversal gt = null;
@@ -100,36 +122,15 @@ public class JanusgraphClient extends DB {
         scriptResult = gremlinEngine.eval(script, bindings);
         if (scriptResult instanceof GraphTraversal) {
           gt = (GraphTraversal) scriptResult;
-          // log.info("To execute graph traversal: {}", GroovyTranslator.of("g").translate(gt.asAdmin().getBytecode()));
-          List<?> result = new ArrayList<>();
+          // 填充传入的 result 列表
           gt.fill(result);
-
-          // log.info("Got result (size={}): ", result.size());
-          // for (Object obj : result) {
-          //     if (obj instanceof Vertex) {
-          //         log.info("Vertex id={}", ((Vertex) obj).id());
-          //     } else if (obj instanceof Edge) {
-          //         log.info("Edge id={}", ((Edge) obj).id());
-          //     } else if (obj instanceof Map) {
-          //         log.info("Map: ");
-          //         Map<?, ?> map = (Map<?, ?>) obj;
-          //         for (Map.Entry<?, ?> entry : map.entrySet()) {
-          //             log.info("  Key={}, Value={}", entry.getKey(), entry.getValue());
-          //         }
-          //     } else {
-          //         log.info("Got {}", obj);
-          //     }
-          // }
-        } else {
-          // log.info("Get script result: {}", scriptResult);
         }
-        g.tx().commit();
-      } catch (ScriptException e) {
-        logger.error("Could not evaluate script {}", script, e);
-        g.tx().rollback();
+        break;
       } catch (Throwable e) {
         logger.error("Got exception", e);
-        g.tx().rollback();
+        System.out.println("Could not evaluate script");
+        e.printStackTrace();
+        return Status.ERROR;
       } finally {
         if (gt != null) {
           try {
@@ -140,15 +141,17 @@ public class JanusgraphClient extends DB {
         }
       }
     }
+    return Status.OK;
   }
+
   @Override
   public void init() throws DBException {
-    // initialize FoundationDB driver
     try {
       final Properties props = getProperties();
       String hostname = props.getProperty(HOST_NAME, HOST_NAME_DEFAULT);
       String authOverride = props.getProperty(AUTH_OVERRIDE, AUTH_OVERRIDE_DEFAULT);
       String keyspace = props.getProperty(KEYSPACE, KEYSPACE_DEFAULT);
+      usecache = props.getProperty(USE_CACHE, USE_CACHE_DEFAULT);
 
       System.out.println("hostname: " + hostname);
       System.out.println("auth: " + authOverride);
@@ -160,25 +163,54 @@ public class JanusgraphClient extends DB {
       bindings = gremlinEngine.createBindings();
       bindings.put("g", g);
 
+      // 启动共享 CSV 查询读取线程（多个 JanusgraphClient 实例共用）
+      synchronized (JanusgraphClient.class) {
+        if (csvReaderThread == null || !csvReaderThread.isAlive()) {
+          String csvDir = props.getProperty(CSV_DIRECTORY, CSV_DIRECTORY_DEFAULT);
+          csvReaderThread = new CSVQueryReaderThread(csvDir, QUERY);
+          csvReaderThread.setDaemon(true);
+          csvReaderThread.start();
+        }
+        
+        // 启动队列监控线程，定期打印队列大小
+        if (queueMonitorThread == null || !queueMonitorThread.isAlive()) {
+          queueMonitorThread = new Thread(() -> {
+              while (!Thread.currentThread().isInterrupted()) {
+                System.out.println("Queue size: " + QUERY.size());
+                try {
+                  Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                  Thread.currentThread().interrupt();
+                }
+              }
+            }
+          );
+          queueMonitorThread.setDaemon(true);
+          queueMonitorThread.start();
+        }
+      }
+      
     } catch (Exception e) {
       e.printStackTrace();
+      throw new DBException(e);
     }
-    
-    // String apiVersion = props.getProperty(API_VERSION, API_VERSION_DEFAULT);
   }
 
   @Override
   public void cleanup() throws DBException {
     try {
-      // db.close();
+      // 关闭图遍历源及相关服务
       g.close();
+      NuGraphConfigManager.shutdownService();
+      // 注意：共享的 CSV 读取线程和队列监控线程不在此处中断，以便其他实例继续使用
       String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH:mm:ss").format(new java.util.Date());
-      System.out.println("Finish running at "+timeStamp);
+      System.out.println("Finish running at " + timeStamp);
     } catch (Exception e) {
       logger.error(MessageFormatter.format("Error in database operation: {}", "cleanup").getMessage(), e);
       throw new DBException(e);
     }
   }
+
   @Override
   public Status insert(String table, String key, Map<String, ByteIterator> values) {
     return Status.OK;
@@ -194,15 +226,17 @@ public class JanusgraphClient extends DB {
     return Status.OK;
   }
 
+  /**
+  * multiget 不再使用外部输入，而是从共享缓冲区中获取 query.
+  */
   @Override
-  public Status multiget(String query, Map<String, Map<String, ByteIterator>> result) {
+  public Status multiget(String[] ignored, List<?> result) {
     try {
-      System.out.println(query);
-      process(query, 1);
-      return Status.OK;
-
+      // 从共享缓冲区中获取一个 query（若为空则等待）
+      String query = QUERY.take();
+      ignored[0] = query;
+      return process(query, 1, result);
     } catch (Exception e) {
-      // logger.error(MessageFormatter.format("Error reading key: {}", rowKey).getMessage(), e);
       e.printStackTrace();
     }
     return Status.ERROR;
@@ -212,6 +246,7 @@ public class JanusgraphClient extends DB {
   public Status manyget(String query, Map<String, Map<String, ByteIterator>> result) {
     return Status.OK;
   }
+  
   @Override
   public Status update(String table, String key, Map<String, ByteIterator> values) {
     return Status.OK;
@@ -221,5 +256,53 @@ public class JanusgraphClient extends DB {
   public Status scan(String table, String startkey, int recordcount, Set<String> fields,
       Vector<HashMap<String, ByteIterator>> result) {
     return Status.OK;
+  }
+  
+  /**
+  * 静态内部线程：从指定目录下读取所有 CSV 文件，打乱顺序后逐行读取 query 字段，
+  * 并将每个 query 放入共享 BlockingQueue.
+  */
+  private static class CSVQueryReaderThread extends Thread {
+    private final String directoryPath;
+    private final BlockingQueue<String> queryQueue;
+
+    public CSVQueryReaderThread(String directoryPath, BlockingQueue<String> queryQueue) {
+      this.directoryPath = directoryPath;
+      this.queryQueue = queryQueue;
+    }
+
+    @Override
+    public void run() {
+      while (!Thread.currentThread().isInterrupted()) {
+        File dir = new File(directoryPath);
+        File[] csvFiles = dir.listFiles((d, name) -> name.toLowerCase().endsWith(".csv"));
+        if (csvFiles == null || csvFiles.length == 0) {
+          try {
+            Thread.sleep(1000); // 无 CSV 文件时等待
+          } catch (InterruptedException e) {
+            break;
+          }
+          continue;
+        }
+        List<File> fileList = Arrays.asList(csvFiles);
+        Collections.shuffle(fileList);
+        for (File csvFile : fileList) {
+          System.out.println("Reading File: " + csvFile.getName());
+          try (Reader in = new FileReader(csvFile)) {
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT
+                    .withHeader("seconds", "query", "queryDurationMs")
+                    .withFirstRecordAsHeader()
+                    .parse(in);
+            for (CSVRecord record : records) {
+              // 获取每行的 query 字段，并加入队列
+              String query = record.get("query");
+              queryQueue.put(query);
+            }
+          } catch (Exception e) {
+            logger.error("Error reading CSV file: " + csvFile.getAbsolutePath(), e);
+          }
+        }
+      }
+    }
   }
 }

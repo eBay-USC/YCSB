@@ -252,16 +252,50 @@ public class DBWrapper extends DB {
       return res;
     }
   }
+  public static int getQueryType(String query) {
+    if (query == null) {
+      return 0;
+    }
+    
+    if (query.startsWith("g.union(") &&
+        query.contains(".coalesce(") &&
+        query.contains("__.V().has(\"graph_id\",") &&
+        query.contains(".has(\"entity_id\"") &&
+        query.endsWith(".coalesce(__.local(__.outE(\"related_aspect\").has(\"probability\",P.gt(0.05d)).order().by(\"probability\",Order.desc)).project(\"destinationProps\",\"edgeProps\",\"sourceProps\").by(__.inV().valueMap(\"entity_id\",\"count\",\"prefLabel\",\"type\",\"image_uri\")).by(__.valueMap(\"type\",\"probability\")).by(__.outV().valueMap(\"entity_id\",\"count\",\"prefLabel\",\"type\",\"image_uri\")),__.project(\"sourceProps\").by(__.valueMap(\"entity_id\",\"count\",\"prefLabel\",\"type\",\"image_uri\")))")) {
+      return 1;
+    }
+    
+    if (query.startsWith("g.union(") &&
+        query.contains(".coalesce(") &&
+        query.contains("__.V().has(\"graph_id\",") &&
+        query.contains(".has(\"entity_id\"") &&
+        query.endsWith(".coalesce(__.local(__.outE(\"item2item\").has(\"probability\",P.gt(0.0d)).order().by(\"probability\",Order.desc)).project(\"destinationProps\",\"edgeProps\",\"sourceProps\").by(__.inV().valueMap(true)).by(__.valueMap(true)).by(__.outV().valueMap(true)),__.project(\"sourceProps\").by(__.valueMap(true)))")) {
+      return 2;
+    }
+    
+    if (query.startsWith("g.union(__.coalesce(__.V().has(\"graph_id\"") &&
+        query.contains(".has(\"entity_id\"") &&
+        query.endsWith(".valueMap(true),__.constant([])))")) {
+      return 3;
+    }
+    
+    if (query.startsWith("g.inject((int) 1).union(__.project(\"original_span\",\"current_span\",\"nodes\").by(__.constant(") &&
+        query.endsWith("has(\"count\",P.gt((int) 20)).order().by(\"count\",Order.desc).limit(1000L).valueMap().with(\"~tinkerpop.valueMap.tokens\",(int) 1).fold()))")) {
+      return 4;
+    }
+    return 5;
+  }
 
   @Override
-  public Status multiget(String query, Map<String, Map<String, ByteIterator>> result) {
+  public Status multiget(String[] ignored, List<?> result) {
     try (final TraceScope span = tracer.newScope(scopeStringMultiGet)) {
       long ist = measurements.getIntendedStartTimeNs();
       long st = System.nanoTime();
-      Status res = db.multiget(query, result);
+      Status res = db.multiget(ignored, result);
       long en = System.nanoTime();
       measure("MULTIGET", res, ist, st, en);
       measurements.reportStatus("MULTIGET", res);
+      System.out.println(getQueryType(ignored[0])+ ", " + result.size() + ", " + (en-st));
       return res;
     }
   }
