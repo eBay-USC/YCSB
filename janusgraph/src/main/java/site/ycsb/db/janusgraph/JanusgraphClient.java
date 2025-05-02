@@ -69,6 +69,8 @@ public class JanusgraphClient extends DB {
   private static final String CSV_DIRECTORY_DEFAULT = "/data/";
   private static final String USE_CACHE = "nugraph.usecache";
   private static final String USE_CACHE_DEFAULT = "true";
+  private static final String QUERY_TYPE = "nugraph.querytype";
+  private static final String QUERY_TYPE_DEFAULT = "0";
 
   // 使用 BlockingQueue 替代自定义的 QueryBuffer，设置一个合适的容量（例如：1,000,000 条记录）
   private static final BlockingQueue<String> QUERY = new LinkedBlockingQueue<>(1000000);
@@ -83,6 +85,7 @@ public class JanusgraphClient extends DB {
   private Bindings bindings;
   private static Logger logger = LoggerFactory.getLogger(JanusgraphClient.class);
   private String usecache;
+  private String querytype;
 
   public synchronized RemoteNuGraphTraversalSource getInstance(String hostName, 
       String authOverride, String keyspace) {
@@ -114,7 +117,7 @@ public class JanusgraphClient extends DB {
     if (script.startsWith("g.")) {
       script = "g.with(\"cache\", " + usecache + ")." + script.substring(2);
     }
-    // System.out.println(script);
+    System.out.println(script);
     for (int i = 0; i < repeat; ++i) {
       final Object scriptResult;
       GraphTraversal gt = null;
@@ -152,6 +155,7 @@ public class JanusgraphClient extends DB {
       String authOverride = props.getProperty(AUTH_OVERRIDE, AUTH_OVERRIDE_DEFAULT);
       String keyspace = props.getProperty(KEYSPACE, KEYSPACE_DEFAULT);
       usecache = props.getProperty(USE_CACHE, USE_CACHE_DEFAULT);
+      querytype = props.getProperty(QUERY_TYPE, QUERY_TYPE_DEFAULT);
 
       System.out.println("hostname: " + hostname);
       System.out.println("auth: " + authOverride);
@@ -167,7 +171,7 @@ public class JanusgraphClient extends DB {
       synchronized (JanusgraphClient.class) {
         if (csvReaderThread == null || !csvReaderThread.isAlive()) {
           String csvDir = props.getProperty(CSV_DIRECTORY, CSV_DIRECTORY_DEFAULT);
-          csvReaderThread = new CSVQueryReaderThread(csvDir, QUERY);
+          csvReaderThread = new CSVQueryReaderThread(csvDir, QUERY, querytype);
           csvReaderThread.setDaemon(true);
           csvReaderThread.start();
         }
@@ -265,11 +269,15 @@ public class JanusgraphClient extends DB {
   private static class CSVQueryReaderThread extends Thread {
     private final String directoryPath;
     private final BlockingQueue<String> queryQueue;
+    private final String queryType;
 
-    public CSVQueryReaderThread(String directoryPath, BlockingQueue<String> queryQueue) {
+    public CSVQueryReaderThread(String directoryPath, BlockingQueue<String> queryQueue, String queryType) {
+      this.queryType = queryType;
       this.directoryPath = directoryPath;
       this.queryQueue = queryQueue;
     }
+
+
 
     @Override
     public void run() {
@@ -296,7 +304,25 @@ public class JanusgraphClient extends DB {
             for (CSVRecord record : records) {
               // 获取每行的 query 字段，并加入队列
               String query = record.get("query");
-              queryQueue.put(query);
+              if (queryType.contains("cache")) {
+                if(query.contains("probability")) {
+                  queryQueue.put(query);
+                }
+              } else if (queryType.contains("1")) {
+                if (query.contains("__.outE(\"related_aspect\")")) {
+                  queryQueue.put(query);
+                }
+              } else if (queryType.contains("2")) {
+                if (query.contains("__.outE(\"item2item\")") && query.contains("probability")) {
+                  queryQueue.put(query);
+                }
+              } else if (queryType.contains("5")) {
+                if (query.contains("__.outE(\"inventory_embedding\")") && query.contains("probability") && query.contains("1")) {
+                  queryQueue.put(query);
+                }
+              } else {
+                queryQueue.put(query);
+              }
             }
           } catch (Exception e) {
             logger.error("Error reading CSV file: " + csvFile.getAbsolutePath(), e);
